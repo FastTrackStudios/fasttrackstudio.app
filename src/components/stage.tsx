@@ -23,13 +23,13 @@ import type { ReactNode } from "react";
  * and the padding. Sharing the grid makes drift impossible.
  */
 const RIG = [
-	{ id: "signal", color: "var(--color-signal)" },
-	{ id: "session", color: "var(--color-session)" },
-	{ id: "ignition", color: "var(--color-ignition)" },
+	{ id: "signal", color: "var(--color-signal)", side: -1 },
+	{ id: "session", color: "var(--color-session)", side: 1 },
+	{ id: "ignition", color: "var(--color-ignition)", side: -1 },
 ] as const;
 
 /** Matches the content grid in src/routes/index.tsx exactly. */
-const RIG_GRID = "grid grid-cols-3 gap-6 px-6";
+const RIG_GRID = "rig-grid grid grid-cols-3 gap-6 px-6";
 
 /**
  * Visualiser bar heights. A fixed pattern, not random: the markup has to be
@@ -99,10 +99,15 @@ export function StageBackdrop() {
 
 							<div
 								data-beam={fixture.id}
-								className="beam left-1/2 -translate-x-1/2"
+								className="beam"
 								style={{
-									// @ts-expect-error -- custom property
+									// --i and --side drive the phone layout, where the
+									// products stack and the light comes in from the
+									// sides instead of down from a truss.
+									// @ts-expect-error -- custom properties
 									"--beam": fixture.color,
+									"--i": i,
+									"--side": fixture.side,
 									animation: `cue-up 900ms ease-out ${240 + i * 180}ms backwards`,
 								}}
 							/>

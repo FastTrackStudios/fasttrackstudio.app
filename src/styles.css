@@ -205,6 +205,8 @@ body {
 	   overlapped across the middle third and mixed to olive, which is what
 	   pigment does, not light. */
 	width: 112%;
+	left: 50%;
+	transform: translateX(-50%);
 	height: 84vh;
 	max-height: 68rem;
 	/* A narrow source at the fixture widening to a broad wash on the deck —
@@ -293,15 +295,61 @@ body {
 	--beam-op: 1;
 }
 
-/* Phones: the rig stacks, so three separated beams stop meaning anything.
-   Spread them less and take them down to a wash — ambient light in a small
-   room rather than three specials pointing at nothing. */
+/* ── Phones: booms, not a truss ──────────────────────────────────────────
+   The products stack on a phone, so three vertical throws from an overhead
+   truss light nothing in particular — and a tall thin viewport is the worst
+   possible shape for a top-down beam.
+
+   Side lighting is the real answer, and it is what a small stage actually
+   carries: booms in the wings throwing across, alternating side to side up
+   the height of the rig. Each product gets its own cross-light from the
+   opposite side to its neighbours. */
 @media (max-width: 48rem) {
+	/* Brighter than the desktop rig: a boom throwing across a narrow frame
+	   covers far less of it than a truss throwing down a wide one, so at the
+	   desktop level it read as almost nothing. */
 	.scene {
-		--beam-on: 0.5;
+		--beam-on: 0.62;
 	}
+
+	/* Stop laying the rig out in three columns: with the content stacked,
+	   the columns correspond to nothing. */
+	.rig-grid {
+		display: block;
+	}
+
+	/* The cells must stop being the positioning context too. Left `relative`
+	   they collapse to zero height once the grid is a block — they hold only
+	   absolutely-positioned children — so every percentage `top` below
+	   resolved against 0 and all three booms landed in the same spot. Static
+	   cells hand positioning back to the rig, which spans the full scene. */
+	.rig-grid > * {
+		position: static;
+	}
+
 	.beam {
-		width: 190%;
+		/* A long shaft anchored just off the edge it throws from, tilted down
+		   across the frame. --side is -1 for a left boom, 1 for a right, and
+		   --i steps each one down the height of the rig so every product gets
+		   its own cross-light from the opposite side to its neighbours. */
+		width: 120%;
+		/* Short enough that a boom covers its own product and little else. At
+		   58% the green and amber shafts crossed through each other's zone and
+		   the middle of the page went muddy again. */
+		height: 36%;
+		max-height: none;
+		top: calc(14% + var(--i, 0) * 25%);
+		left: calc(50% + var(--side, -1) * 58%);
+		transform-origin: 50% 0;
+		transform: translateX(-50%) rotate(calc(var(--side, -1) * 54deg));
+		filter: blur(26px);
+	}
+
+	/* The pools belong under an overhead throw. With the light coming from
+	   the wings there is nothing landing on the deck in three neat spots, so
+	   they would read as three unexplained smudges. */
+	.pool {
+		display: none;
 	}
 }
 

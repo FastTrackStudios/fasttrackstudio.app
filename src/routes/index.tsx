@@ -26,7 +26,7 @@ function Home() {
 
 	return (
 		<Scene>
-			<section className="stage-w flex min-h-[100svh] flex-col px-6 pt-16 pb-8">
+			<section className="stage-w flex min-h-[100svh] flex-col px-6 pt-14 pb-6">
 				<Marquee />
 
 				{/*
@@ -34,7 +34,7 @@ function Home() {
 				  Session downstage centre, Ignition at stage right. `items-end`
 				  stands them on the deck rather than floating them in the frame.
 				*/}
-				<div className="mt-auto grid grid-cols-1 items-end gap-10 pt-4 md:grid-cols-3 md:gap-6">
+				<div className="mt-auto grid grid-cols-1 items-end gap-10 pt-2 md:grid-cols-3 md:gap-6">
 					{positions.map((project) => (
 						<Position
 							key={project.slug}
@@ -161,8 +161,42 @@ function Position({ project, centre }: { project: Project; centre: boolean }) {
 				style={{ backgroundColor: project.accent }}
 			/>
 
-			<span className="mx-auto mt-4 block max-w-[26ch] text-sm leading-relaxed text-fg-muted">
-				{project.description}
+			{/*
+			  Three capabilities, not a sentence. The list is left-aligned inside
+			  a centred block: centred list items with leading markers look
+			  ragged on both edges and are harder to scan.
+
+			  The marker is a short rule in the product's colour — the same patch
+			  -cable stub used under the name, so the whole position reads as one
+			  channel rather than a name plus unrelated bullets.
+			*/}
+			<span className="mt-4 flex justify-center">
+				{/* Fixed measure so all three lists share one left edge. Centring
+				    each list as a block let a wider list (Signal's, with its tag
+				    line) start further left than its neighbours, which reads as
+				    ragged once the columns stack on a phone. */}
+				<span className="flex w-full max-w-[15rem] flex-col gap-2.5 text-left">
+					{project.capabilities.map((capability) => (
+						<span key={capability.label} className="flex items-baseline gap-3">
+							<span
+								aria-hidden="true"
+								className="mt-[0.45rem] h-px w-3 shrink-0 opacity-60"
+								style={{ backgroundColor: project.accent }}
+							/>
+							<span className="text-sm leading-snug text-fg-muted">
+								{capability.label}
+								{capability.tags ? (
+									// A set, not a slash-jammed string: rendering the
+									// members on their own line keeps the capability
+									// readable and lets the members read as members.
+									<span className="u-label mt-1.5 block text-fg-subtle">
+										{capability.tags.join(" · ")}
+									</span>
+								) : null}
+							</span>
+						</span>
+					))}
+				</span>
 			</span>
 		</Link>
 	);

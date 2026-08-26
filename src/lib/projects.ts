@@ -10,6 +10,19 @@ import * as z from "zod";
 export const PROJECT_STATUSES = ["alpha", "beta", "stable"] as const;
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
+/**
+ * One thing a product does.
+ *
+ * `tags` exists for capabilities that are really a set — the live rig covers
+ * guitar, keys, drums and more, and "Live Guitar/Keys/Drums/Bass/More! Rig"
+ * as one string is unreadable. Splitting the head from its members lets the
+ * head stay a plain capability and the members render as what they are.
+ */
+export interface Capability {
+	label: string;
+	tags?: readonly string[];
+}
+
 export interface Project {
 	/** URL segment — `/projects/keyflow`. */
 	slug: string;
@@ -23,6 +36,12 @@ export interface Project {
 	accent: string;
 	/** Hex tile background — each project owns a slightly different dark. */
 	background: string;
+	/**
+	 * The three things this product does, for the landing page. Kept separate
+	 * from `description`, which is a sentence and still feeds meta tags and the
+	 * catalogue cards.
+	 */
+	capabilities: readonly Capability[];
 	status: ProjectStatus;
 	version: string;
 	repo: string;
