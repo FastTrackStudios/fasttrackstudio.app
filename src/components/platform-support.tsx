@@ -37,7 +37,7 @@ export function PlatformSupport({
 }) {
 	return (
 		<ul
-			className={`flex items-center justify-center gap-7 ${className}`}
+			className={`flex items-center justify-center gap-6 sm:gap-7 ${className}`}
 			style={style}
 		>
 			{PLATFORMS.map((platform) => (
@@ -47,7 +47,7 @@ export function PlatformSupport({
 						aria-label={platform.name}
 						viewBox="0 0 24 24"
 						fill="currentColor"
-						className="h-6 w-6 text-fg-muted transition-colors duration-300 hover:text-fg"
+						className="h-5 w-5 text-fg-muted transition-colors duration-300 hover:text-fg sm:h-6 sm:w-6"
 					>
 						<title>{platform.name}</title>
 						<path d={platform.path} />

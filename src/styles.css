@@ -295,62 +295,51 @@ body {
 	--beam-op: 1;
 }
 
-/* ── Phones: booms, not a truss ──────────────────────────────────────────
-   The products stack on a phone, so three vertical throws from an overhead
-   truss light nothing in particular — and a tall thin viewport is the worst
-   possible shape for a top-down beam.
-
-   Side lighting is the real answer, and it is what a small stage actually
-   carries: booms in the wings throwing across, alternating side to side up
-   the height of the rig. Each product gets its own cross-light from the
-   opposite side to its neighbours. */
+/* ── Phones ─────────────────────────────────────────────────────────────
+   The shared rig goes dark and each product lights itself. */
 @media (max-width: 48rem) {
-	/* Brighter than the desktop rig: a boom throwing across a narrow frame
-	   covers far less of it than a truss throwing down a wide one, so at the
-	   desktop level it read as almost nothing. */
-	.scene {
-		--beam-on: 0.62;
-	}
-
-	/* Stop laying the rig out in three columns: with the content stacked,
-	   the columns correspond to nothing. */
-	.rig-grid {
-		display: block;
-	}
-
-	/* The cells must stop being the positioning context too. Left `relative`
-	   they collapse to zero height once the grid is a block — they hold only
-	   absolutely-positioned children — so every percentage `top` below
-	   resolved against 0 and all three booms landed in the same spot. Static
-	   cells hand positioning back to the rig, which spans the full scene. */
-	.rig-grid > * {
-		position: static;
-	}
-
-	.beam {
-		/* A long shaft anchored just off the edge it throws from, tilted down
-		   across the frame. --side is -1 for a left boom, 1 for a right, and
-		   --i steps each one down the height of the rig so every product gets
-		   its own cross-light from the opposite side to its neighbours. */
-		width: 120%;
-		/* Short enough that a boom covers its own product and little else. At
-		   58% the green and amber shafts crossed through each other's zone and
-		   the middle of the page went muddy again. */
-		height: 36%;
-		max-height: none;
-		top: calc(14% + var(--i, 0) * 25%);
-		left: calc(50% + var(--side, -1) * 58%);
-		transform-origin: 50% 0;
-		transform: translateX(-50%) rotate(calc(var(--side, -1) * 54deg));
-		filter: blur(26px);
-	}
-
-	/* The pools belong under an overhead throw. With the light coming from
-	   the wings there is nothing landing on the deck in three neat spots, so
-	   they would read as three unexplained smudges. */
+	/*
+	 * The truss goes dark on a phone. Every attempt to make one shared rig
+	 * serve a stacked layout produced the same mess: a shaft long enough to
+	 * reach the third product crossed the first two, and the clip edges drew
+	 * diagonal lines through the type. Each product carries its own light
+	 * instead — see .pos-light below.
+	 */
+	.beam,
 	.pool {
 		display: none;
 	}
+
+
+}
+
+/* ── One light per product (phones) ──────────────────────────────────────
+   A single soft glow per product, biased toward the wing it comes from.
+
+   This started as a clipped shaft plus a pool, which is closer to how the
+   desktop rig works — and it looked like three grey boxes. Clipping a blurred
+   beam with `overflow: hidden` shows the rectangle, and feathering that with
+   a mask made it worse: the mask forms a stacking context, so the children's
+   `mix-blend-mode: screen` began compositing against the masked group instead
+   of the page and lightened the whole rectangle.
+
+   A radial gradient cannot produce a hard edge, needs no clipping, no mask and
+   no blend mode, and it says the same thing: this product is lit, from that
+   side. Neighbouring glows overlap a little, which is what spill looks like.
+*/
+
+.pos-light {
+	position: absolute;
+	inset: -12% -18%;
+	pointer-events: none;
+	z-index: 0;
+	background: radial-gradient(
+		ellipse 58% 44% at calc(50% + var(--side, -1) * 20%) 32%,
+		color-mix(in oklab, var(--beam) 34%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 15%, transparent) 36%,
+		color-mix(in oklab, var(--beam) 5%, transparent) 58%,
+		transparent 76%
+	);
 }
 
 /* ── Deck ───────────────────────────────────────────────────────────────
@@ -364,7 +353,10 @@ body {
 
 .deck__plane {
 	position: absolute;
-	inset: -60% -40% 0 -40%;
+	/* Wide enough that the plane's own side edges — which converge toward the
+	   vanishing point once it is in perspective, and read as stray diagonal
+	   lines — stay off screen at every width. */
+	inset: -60% -140% 0 -140%;
 	transform: rotateX(74deg);
 	transform-origin: 50% 0%;
 	background:
