@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 
 import { ProjectCard } from "#/components/project-card";
 import { fetchProjectList } from "#/fn/projects";
@@ -42,10 +43,59 @@ function ProjectsIndex() {
 	const search = Route.useSearch();
 	const navigate = Route.useNavigate();
 
-	/** Search params are the single source of truth — no mirrored state. */
+	/**
+	 * Discrete controls (the selects) write straight to the URL — one change,
+	 * one navigation.
+	 */
 	function setSearch(patch: Partial<typeof search>) {
 		navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 	}
+
+	/**
+	 * The filter box is deliberately UNCONTROLLED.
+	 *
+	 * Binding `value` to `search.q` makes React rewrite the DOM value on every
+	 * render while the router round-trip is still in flight, which eats
+	 * characters mid-word. Letting the DOM own the text and publishing it to
+	 * the URL on a debounce keeps typing instant, keeps the URL the source of
+	 * truth for the query, and re-runs the loader once per settled word
+	 * instead of once per keystroke.
+	 */
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	/** The last value this component published, to recognise its own echo. */
+	const published = useRef(search.q ?? "");
+
+	const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	/** Debounced: only settled input reaches the URL and re-runs the loader. */
+	function publishQuery(value: string) {
+		if (timer.current) clearTimeout(timer.current);
+		timer.current = setTimeout(() => {
+			published.current = value;
+			navigate({
+				search: (prev) => ({ ...prev, q: value || undefined }),
+				replace: true,
+			});
+		}, 250);
+	}
+
+	useEffect(
+		() => () => {
+			if (timer.current) clearTimeout(timer.current);
+		},
+		[],
+	);
+
+	// Push the URL into the box only when it changed from OUTSIDE it —
+	// back/forward, a pasted link. Our own echo is ignored, so typing is
+	// never interrupted.
+	useEffect(() => {
+		const fromUrl = search.q ?? "";
+		if (fromUrl === published.current) return;
+		published.current = fromUrl;
+		if (inputRef.current) inputRef.current.value = fromUrl;
+	}, [search.q]);
 
 	return (
 		<section className="mx-auto max-w-6xl px-6 py-24">
@@ -63,10 +113,9 @@ function ProjectsIndex() {
 				<input
 					id="project-search"
 					type="search"
-					value={search.q ?? ""}
-					onChange={(event) =>
-						setSearch({ q: event.target.value || undefined })
-					}
+					ref={inputRef}
+					defaultValue={search.q ?? ""}
+					onChange={(event) => publishQuery(event.target.value)}
 					placeholder="Filter…"
 					className="w-56 rounded border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-subtle"
 				/>

@@ -15,7 +15,7 @@ export const waitlistSchema = z.object({
 export type WaitlistInput = z.infer<typeof waitlistSchema>;
 
 export const joinWaitlist = createServerFn({ method: "POST" })
-	.inputValidator(waitlistSchema)
+	.validator(waitlistSchema)
 	.handler(async ({ data }) => {
 		const entry = await recordSignup(data);
 		return { ok: true as const, createdAt: entry.createdAt };

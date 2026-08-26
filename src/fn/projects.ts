@@ -20,12 +20,12 @@ export const fetchProjects = createServerFn({ method: "GET" }).handler(
 
 /** Filtered + sorted view — driven by the `/projects` search params. */
 export const fetchProjectList = createServerFn({ method: "GET" })
-	.inputValidator(projectSearchSchema)
+	.validator(projectSearchSchema)
 	.handler(async ({ data }) => queryProjects(data));
 
 /** One project. Throws `notFound()` so the route renders its 404 component. */
 export const fetchProject = createServerFn({ method: "GET" })
-	.inputValidator(z.object({ slug: z.string().min(1).max(64) }))
+	.validator(z.object({ slug: z.string().min(1).max(64) }))
 	.handler(async ({ data }) => {
 		const project = findProject(data.slug);
 		if (!project) throw notFound();
