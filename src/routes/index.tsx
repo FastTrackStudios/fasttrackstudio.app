@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { ProjectCard } from "#/components/project-card";
 import { fetchProjects } from "#/fn/projects";
-import { SITE } from "#/lib/site";
+import { HERO, SITE } from "#/lib/site";
 
 export const Route = createFileRoute("/")({
 	// Full SSR. This is the page search engines and link unfurlers read, so
@@ -65,23 +65,29 @@ function Home() {
 }
 
 /**
- * PLACEHOLDER HERO — structure only, so the redesign has something to
- * replace rather than something to untangle.
+ * Hero. Copy lives in `HERO` (src/lib/site.ts) so wording changes do not
+ * mean touching markup.
+ *
+ * The two lines carry different jobs, so they are weighted differently: the
+ * lead states what this is and takes the size; the stance is the position and
+ * takes the color, with "OPEN" alone in the accent gradient. Giving both lines
+ * the gradient would flatten them into one shout.
  */
 function Hero() {
 	return (
 		<section className="mx-auto max-w-6xl px-6 pt-24 pb-16 md:pt-32">
-			<h1 className="max-w-3xl text-balance text-5xl font-semibold tracking-tight md:text-7xl">
-				<span className="bg-gradient-to-r from-accent to-accent-alt bg-clip-text text-transparent">
-					Workflow-driven
-				</span>
-				<span className="mt-2 block text-3xl font-light text-fg-muted md:text-5xl">
-					Made for professionals.
+			<h1 className="max-w-4xl text-balance text-5xl font-semibold tracking-tight md:text-7xl">
+				{HERO.lead}
+				<span className="mt-3 block text-3xl font-light text-fg-muted md:text-5xl">
+					{HERO.stance.before}
+					<span className="bg-gradient-to-r from-accent to-accent-alt bg-clip-text font-semibold text-transparent">
+						{HERO.stance.emphasis}
+					</span>
 				</span>
 			</h1>
 
 			<p className="mt-8 max-w-2xl text-lg leading-relaxed text-fg-muted">
-				{SITE.description}
+				{HERO.subhead}
 			</p>
 		</section>
 	);

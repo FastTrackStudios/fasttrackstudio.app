@@ -14,78 +14,108 @@ import "@tanstack/react-start/server-only";
 
 import type { Project, ProjectSearch } from "#/lib/projects";
 
+/**
+ * Catalogue order is deliberate: the three products that define the system
+ * come first — Signal (audio), Ignition (visual), Session (the coordinator
+ * that drives both) — then the layers underneath them.
+ *
+ * Every repo link points at GitHub — the pre-split Codeberg URLs the old site
+ * used are 404 now. Three of these are not standalone repos after the August
+ * 2026 split and link to the repo that absorbed them: Keyflow lives in
+ * `session`, Input in `daw`, Plugins in `signal`. Verify a link resolves
+ * before changing it.
+ */
 const PROJECTS: readonly Project[] = [
-	{
-		slug: "keyflow",
-		name: "Keyflow",
-		tagline: "Charts as code",
-		description: "Plain-text music format that compiles into real lead sheets.",
-		glyph: ".kf",
-		accent: "#a78bfa",
-		background: "#0d0a14",
-		status: "alpha",
-		version: "0.0.1",
-		repo: "https://codeberg.org/FastTrackStudios/keyflow",
-	},
 	{
 		slug: "session",
 		name: "Session",
-		tagline: "Performance brain",
-		description: "Setlist · song · section navigation across the network.",
+		tagline: "Runs the show",
+		description:
+			"The coordinator. Drives Signal and Ignition together over the network — setlists, songs, sections, cues.",
 		glyph: "→→",
 		accent: "#86efac",
 		background: "#0a1310",
 		status: "alpha",
 		version: "0.0.1",
-		repo: "https://codeberg.org/FastTrackStudios/session",
+		repo: "https://github.com/FastTrackStudios/session",
 	},
 	{
 		slug: "signal",
 		name: "Signal",
-		tagline: "The audio rig",
-		description: "Plugin chains, profiles, snapshots, live morphing.",
+		tagline: "Drives the sound",
+		description:
+			"The audio side. Sampler, sound generation, plugin rigs, profiles and live morphing.",
 		glyph: "≋",
 		accent: "#60a5fa",
 		background: "#0a1018",
 		status: "alpha",
 		version: "0.0.1",
-		repo: "https://codeberg.org/FastTrackStudios/signal",
+		repo: "https://github.com/FastTrackStudios/signal",
 	},
 	{
-		slug: "input",
-		name: "Input",
-		tagline: "Wiring closet",
-		description: "MIDI, keys, hardware controllers — into the action system.",
-		glyph: "I/O",
-		accent: "#a1a1aa",
-		background: "#0f0f12",
+		slug: "ignition",
+		name: "Ignition",
+		tagline: "Drives the light",
+		description:
+			"The visual side. Lighting and projection mapping on a Bevy visuals engine.",
+		glyph: "✦",
+		accent: "#fbbf24",
+		background: "#140f05",
 		status: "alpha",
 		version: "0.0.1",
-		repo: "https://codeberg.org/FastTrackStudios/input",
+		repo: "https://github.com/FastTrackStudios/Ignition",
+	},
+	{
+		slug: "keyflow",
+		name: "Keyflow",
+		tagline: "Charts as code",
+		description:
+			"Plain-text music format that compiles into real lead sheets. Lives inside the session repo.",
+		glyph: ".kf",
+		accent: "#a78bfa",
+		background: "#0d0a14",
+		status: "alpha",
+		version: "0.0.1",
+		repo: "https://github.com/FastTrackStudios/session",
 	},
 	{
 		slug: "daw",
 		name: "DAW",
-		tagline: "REAPER layer",
-		description: "Unified API. Transport, tracks, FX, project files.",
+		tagline: "The substrate",
+		description:
+			"Unified API over the DAW. Transport, tracks, FX, project files, and the shared audio/MIDI substrate.",
 		glyph: "⏵",
 		accent: "#52525b",
 		background: "#050507",
 		status: "alpha",
 		version: "0.0.1",
-		repo: "https://codeberg.org/FastTrackStudios/daw",
+		repo: "https://github.com/FastTrackStudios/daw",
+	},
+	{
+		slug: "input",
+		name: "Input",
+		tagline: "Wiring closet",
+		description:
+			"MIDI, keys, hardware controllers — into the action system. Part of the daw substrate.",
+		glyph: "I/O",
+		accent: "#a1a1aa",
+		background: "#0f0f12",
+		status: "alpha",
+		version: "0.0.1",
+		repo: "https://github.com/FastTrackStudios/daw",
 	},
 	{
 		slug: "plugins",
 		name: "Plugins",
 		tagline: "DSP suite",
-		description: "In-house CLAP/VST3 plugins with detachable GUI.",
+		description:
+			"In-house CLAP/VST3 plugins with detachable GUI. Ship inside the signal repo.",
 		glyph: "FX",
 		accent: "#b54234",
 		background: "#140a08",
 		status: "alpha",
 		version: "0.0.1",
-		repo: "https://codeberg.org/FastTrackStudios/FTS-Plugins",
+		repo: "https://github.com/FastTrackStudios/signal",
 	},
 ];
 

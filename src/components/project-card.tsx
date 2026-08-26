@@ -16,9 +16,9 @@ export function ProjectCard({ project }: { project: Project }) {
 				backgroundColor: project.background,
 				borderColor: "var(--color-line)",
 			}}
-			className="group relative flex min-h-56 flex-col justify-between overflow-hidden rounded-card border p-7 transition-all duration-300 hover:-translate-y-0.5"
+			className="group relative flex min-h-56 flex-col overflow-hidden rounded-card border p-7 transition-all duration-300 hover:-translate-y-0.5"
 		>
-			<div className="flex items-start justify-between">
+			<div className="mb-8 flex items-start justify-between">
 				<span
 					className="font-mono text-[0.65rem] uppercase tracking-[0.25em] opacity-75"
 					style={{ color: project.accent }}
