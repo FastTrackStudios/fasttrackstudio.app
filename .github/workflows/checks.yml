@@ -1,0 +1,34 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # The route tree is committed; a stale one means the app builds
+      # differently than the routes on disk say it should.
+      - name: Route tree is up to date
+        run: |
+          bun run generate-routes
+          git diff --exit-code -- src/routeTree.gen.ts
+
+      - name: Lint + format
+        run: bunx biome ci .
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+
+      - name: Build
+        run: bun run build

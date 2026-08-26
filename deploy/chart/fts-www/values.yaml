@@ -1,0 +1,61 @@
+# fts-www — the apex landing page. One SSR container, no state except the
+# optional waitlist volume.
+#
+# CI (.github/workflows/deploy.yml) pushes
+#   registry.starcommand.live:30050/fts-www:latest + :sha-<short>
+# on every main push; argocd-image-updater (digest strategy on :latest)
+# rolls the Deployment.
+#
+# NOTE: the Dioxus app in the FastTrackStudio monorepo (chart `fts-site`)
+# currently claims `fasttrackstudio.app` in ITS ingress. Two Ingresses on
+# one host is undefined behaviour — drop the apex host from fts-site's
+# values.yaml (leaving it on its own subdomain) in the same change that
+# first deploys this chart.
+
+image:
+  registry: registry.starcommand.live:30050
+  repository: fts-www
+  # Empty = chart appVersion ("latest").
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# 1 by default: with `persistence.enabled` the /data PVC is ReadWriteOnce,
+# so extra replicas would fail to schedule. Raise it once the waitlist sink
+# is backed by a real service instead of a file.
+replicas: 1
+
+# Nitro's node-server listens on $PORT.
+containerPort: 3000
+
+env: []
+# - name: SOME_KEY
+#   value: "..."
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 512Mi
+
+# The waitlist sink appends to WAITLIST_FILE. Off = emptyDir, i.e. signups
+# are lost on rollout. Turn on (or replace the sink in src/server/waitlist.ts
+# with a real backend) before pointing humans at the form.
+persistence:
+  enabled: false
+  size: 1Gi
+  storageClass: ""
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  # Every host serves the same app. fasttrackstudio.app needs external DNS
+  # pointed at the cluster edge; the starcommand.live host rides the existing
+  # wildcard and is what CI's verify-live can poll from the LAN.
+  hosts:
+    - fasttrackstudio.app
+    - www.fasttrackstudio.app
+    - fts-www.starcommand.live
+  # e.g. tls: [{ secretName: fts-www-tls, hosts: [fasttrackstudio.app] }]
+  tls: []

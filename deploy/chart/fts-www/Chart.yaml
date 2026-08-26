@@ -1,0 +1,8 @@
+apiVersion: v2
+name: fts-www
+description: fasttrackstudio.app — the marketing landing page (TanStack Start, SSR)
+type: application
+version: 0.1.0
+# Overridden by image.tag; "latest" is the channel argocd-image-updater
+# watches by digest.
+appVersion: "latest"

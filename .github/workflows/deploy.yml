@@ -1,0 +1,81 @@
+# Deploys fasttrackstudio.app.
+#
+#   docker build -> registry.starcommand.live:30050/fts-www:{latest,sha-<short>}
+#
+# Runs on the SELF-HOSTED runner labeled `nix-host` (THEBATTLESHIP): the
+# in-cluster registry is LAN-only and unreachable from GitHub-hosted runners.
+# That host already has dockerd with the registry declared insecure (see
+# ~/.flake modules/system/virtualization.nix), so no login or TLS setup here.
+#
+# argocd-image-updater (digest strategy on the `latest` tag) rolls the
+# Deployment; "Verify live" then polls /version.json until the cluster serves
+# THIS commit, so a green run means deployed, not merely pushed.
+
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never cancel a deploy mid-push; queue instead.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: registry.starcommand.live:30050
+  IMAGE: fts-www
+  # Polled by Verify live. The starcommand host rides the existing wildcard,
+  # so it works before external DNS for the apex is cut over. Point this at
+  # https://fasttrackstudio.app once the apex resolves to the cluster edge.
+  VERIFY_URL: https://fts-www.starcommand.live
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, nix-host]
+    environment:
+      name: production
+      url: https://fasttrackstudio.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute tags
+        id: tags
+        run: |
+          echo "sha=sha-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Build image
+        run: |
+          set -euo pipefail
+          docker build \
+            --build-arg "GIT_SHA=${GITHUB_SHA}" \
+            --build-arg "BUILD_TIME=${{ steps.tags.outputs.built_at }}" \
+            -t "${REGISTRY}/${IMAGE}:${{ steps.tags.outputs.sha }}" \
+            -t "${REGISTRY}/${IMAGE}:latest" \
+            .
+
+      - name: Push image
+        run: |
+          set -euo pipefail
+          docker push "${REGISTRY}/${IMAGE}:${{ steps.tags.outputs.sha }}"
+          docker push "${REGISTRY}/${IMAGE}:latest"
+
+      - name: Verify live
+        run: |
+          want="${GITHUB_SHA}"
+          echo "waiting for ${VERIFY_URL} to serve ${want}"
+          for i in $(seq 1 60); do
+            rev="$(curl -sf --max-time 10 "${VERIFY_URL}/version.json" \
+              | sed -n 's/.*"rev":"\([^"]*\)".*/\1/p' || true)"
+            echo "  poll $i: rev=${rev:-?}"
+            if [ "$rev" = "$want" ]; then
+              echo "LIVE: ${VERIFY_URL} serves ${want}"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "TIMED OUT: ${VERIFY_URL} never served ${want}"
+          echo "check argocd-image-updater and the fts-www Application"
+          exit 1
