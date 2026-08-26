@@ -11,8 +11,14 @@ export const SITE = {
 	tagline: "The Complete AV Toolkit",
 	description:
 		"Open-source audio-visual software for live performance and production. Signal drives the sound, Ignition drives the light, Session runs the show.",
-	/** Shown as the hero eyebrow — the three domains, in one breath. */
-	domains: "Audio · Light · Control",
+	/**
+	 * Shown as the hero eyebrow. The order is NOT cosmetic: it reads as a
+	 * legend for the three positions directly below it, so it must run
+	 * left-to-right in stage order — Signal (audio), Session (control),
+	 * Ignition (light). Reordering this without reordering the rig breaks the
+	 * mapping.
+	 */
+	domains: "Audio · Control · Light",
 	/** Painted as <meta name="theme-color">; keep in sync with --color-bg. */
 	themeColor: "#0d0a14",
 	locale: "en_US",
