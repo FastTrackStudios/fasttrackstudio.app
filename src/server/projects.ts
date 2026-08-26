@@ -19,11 +19,19 @@ import type { Project, ProjectSearch } from "#/lib/projects";
  * come first — Signal (audio), Ignition (visual), Session (the coordinator
  * that drives both) — then the layers underneath them.
  *
+ * Signal, Session and Ignition are the products — the audio side, the
+ * coordinator, and the visual side. They are what the front page is, in that
+ * left-to-right order, so `stagePositions()` below returns them explicitly
+ * rather than by slicing this list.
+ *
+ * Keyflow, the DAW layer and the plugin suite are deliberately NOT here: they
+ * are features and substrate inside those three, not things anyone obtains
+ * separately, and listing them made the toolkit look like seven half-products
+ * instead of three whole ones.
+ *
  * Every repo link points at GitHub — the pre-split Codeberg URLs the old site
- * used are 404 now. Three of these are not standalone repos after the August
- * 2026 split and link to the repo that absorbed them: Keyflow lives in
- * `session`, Input in `daw`, Plugins in `signal`. Verify a link resolves
- * before changing it.
+ * used are 404 now. Input is not a standalone repo and links to `daw`, which
+ * absorbed it. Verify a link resolves before changing it.
  */
 const PROJECTS: readonly Project[] = [
 	{
@@ -57,7 +65,7 @@ const PROJECTS: readonly Project[] = [
 		name: "Ignition",
 		tagline: "Drives the light",
 		description:
-			"The visual side. Lighting and projection mapping on a Bevy visuals engine.",
+			"The visual side. Lighting design and projection mapping, cued from the same timeline.",
 		glyph: "✦",
 		accent: "#fbbf24",
 		background: "#140f05",
@@ -66,37 +74,11 @@ const PROJECTS: readonly Project[] = [
 		repo: "https://github.com/FastTrackStudios/Ignition",
 	},
 	{
-		slug: "keyflow",
-		name: "Keyflow",
-		tagline: "Charts as code",
-		description:
-			"Plain-text music format that compiles into real lead sheets. Lives inside the session repo.",
-		glyph: ".kf",
-		accent: "#a78bfa",
-		background: "#0d0a14",
-		status: "alpha",
-		version: "0.0.1",
-		repo: "https://github.com/FastTrackStudios/session",
-	},
-	{
-		slug: "daw",
-		name: "DAW",
-		tagline: "The substrate",
-		description:
-			"Unified API over the DAW. Transport, tracks, FX, project files, and the shared audio/MIDI substrate.",
-		glyph: "⏵",
-		accent: "#52525b",
-		background: "#050507",
-		status: "alpha",
-		version: "0.0.1",
-		repo: "https://github.com/FastTrackStudios/daw",
-	},
-	{
 		slug: "input",
 		name: "Input",
 		tagline: "Wiring closet",
 		description:
-			"MIDI, keys, hardware controllers — into the action system. Part of the daw substrate.",
+			"MIDI, keys, hardware controllers — into the action system. Part of the DAW substrate.",
 		glyph: "I/O",
 		accent: "#a1a1aa",
 		background: "#0f0f12",
@@ -104,20 +86,18 @@ const PROJECTS: readonly Project[] = [
 		version: "0.0.1",
 		repo: "https://github.com/FastTrackStudios/daw",
 	},
-	{
-		slug: "plugins",
-		name: "Plugins",
-		tagline: "DSP suite",
-		description:
-			"In-house CLAP/VST3 plugins with detachable GUI. Ship inside the signal repo.",
-		glyph: "FX",
-		accent: "#b54234",
-		background: "#140a08",
-		status: "alpha",
-		version: "0.0.1",
-		repo: "https://github.com/FastTrackStudios/signal",
-	},
 ];
+
+/**
+ * The three products, in the order they stand on the stage: Signal at stage
+ * left, Session downstage centre, Ignition at stage right. Order is the
+ * layout, so it is fixed here rather than left to catalogue order.
+ */
+export function stagePositions(): Project[] {
+	return ["signal", "session", "ignition"]
+		.map((slug) => PROJECTS.find((p) => p.slug === slug))
+		.filter((p): p is Project => p !== undefined);
+}
 
 /** Every project, in catalogue order. */
 export function listProjects(): readonly Project[] {

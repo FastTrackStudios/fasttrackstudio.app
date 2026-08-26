@@ -11,11 +11,25 @@ import { createServerFn } from "@tanstack/react-start";
 import * as z from "zod";
 
 import { projectSearchSchema } from "#/lib/projects";
-import { findProject, listProjects, queryProjects } from "#/server/projects";
+import {
+	findProject,
+	listProjects,
+	queryProjects,
+	stagePositions,
+} from "#/server/projects";
 
-/** Whole catalogue — used by the landing page's streamed grid. */
+/** Whole catalogue. */
 export const fetchProjects = createServerFn({ method: "GET" }).handler(
 	async () => listProjects(),
+);
+
+/**
+ * The three the landing page is built around. Awaited by the home loader
+ * rather than streamed: these ARE the page, so they belong in the first
+ * response, not in a second flush behind a fallback.
+ */
+export const fetchStagePositions = createServerFn({ method: "GET" }).handler(
+	async () => stagePositions(),
 );
 
 /** Filtered + sorted view — driven by the `/projects` search params. */

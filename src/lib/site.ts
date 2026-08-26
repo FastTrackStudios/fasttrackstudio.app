@@ -11,6 +11,8 @@ export const SITE = {
 	tagline: "The Complete AV Toolkit",
 	description:
 		"Open-source audio-visual software for live performance and production. Signal drives the sound, Ignition drives the light, Session runs the show.",
+	/** Shown as the hero eyebrow — the three domains, in one breath. */
+	domains: "Audio · Light · Control",
 	/** Painted as <meta name="theme-color">; keep in sync with --color-bg. */
 	themeColor: "#0d0a14",
 	locale: "en_US",
@@ -20,16 +22,17 @@ export const SITE = {
  * Hero copy.
  *
  * `lead` is the claim, `stance` is the position — the second line is
- * deliberately shorter and louder, with `emphasis` picked out in the accent
- * gradient. `subhead` does the disambiguation work: bare "AV" can read as
- * conference-room A/V to a cold visitor, so the sentence underneath names the
- * three products and what each one drives.
+ * deliberately shorter, with only `emphasis` at full brightness.
+ *
+ * `subhead` must not restate the three products: they are set in display type
+ * immediately below it on the landing page, so the sentence earns its place by
+ * carrying what they cannot — that this is one system, and where it runs.
  */
 export const HERO = {
 	lead: "The Complete AV Toolkit",
 	stance: { before: "The Future is ", emphasis: "OPEN" },
 	subhead:
-		"Signal drives the sound. Ignition drives the light. Session runs the show. All of it open source, cross-platform, and yours to build on.",
+		"One rig instead of three vendors. Open formats, documented protocols, and it runs on Linux, macOS and Windows.",
 } as const;
 
 /**

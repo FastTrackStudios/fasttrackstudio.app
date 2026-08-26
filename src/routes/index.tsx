@@ -1,8 +1,8 @@
-import { Await, createFileRoute, Link } from "@tanstack/react-router";
-import { Suspense } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { ProjectCard } from "#/components/project-card";
-import { fetchProjects } from "#/fn/projects";
+import { Scene } from "#/components/stage";
+import { fetchStagePositions } from "#/fn/projects";
+import type { Project } from "#/lib/projects";
 import { HERO, SITE } from "#/lib/site";
 
 export const Route = createFileRoute("/")({
@@ -15,96 +15,140 @@ export const Route = createFileRoute("/")({
 			{ name: "description", content: SITE.description },
 		],
 	}),
-	/**
-	 * The promise is returned UNAWAITED on purpose: the hero flushes to the
-	 * browser immediately and the grid streams in behind it. Await a value
-	 * here instead and the whole document waits on the slowest query.
-	 */
-	loader: () => ({ projects: fetchProjects() }),
+	loader: () => fetchStagePositions(),
 	component: Home,
 });
 
 function Home() {
-	const { projects } = Route.useLoaderData();
+	const positions = Route.useLoaderData();
 
 	return (
-		<>
-			<Hero />
+		<Scene>
+			<section className="stage-w flex min-h-[100svh] flex-col px-6 pt-20 pb-10">
+				<Marquee />
 
-			<section className="mx-auto max-w-6xl px-6 py-24">
-				<header className="mb-12">
-					<p className="font-mono text-xs uppercase tracking-[0.25em] text-fg-subtle">
-						Currently in development
-					</p>
-					<h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-						Active projects
-					</h2>
-				</header>
+				{/*
+				  The rig. Three positions across the stage: Signal at stage left,
+				  Session downstage centre, Ignition at stage right. `items-end`
+				  stands them on the deck rather than floating them in the frame.
+				*/}
+				<div className="mt-auto grid grid-cols-1 items-end gap-12 pt-6 md:grid-cols-3 md:gap-6">
+					{positions.map((project) => (
+						<Position
+							key={project.slug}
+							project={project}
+							centre={project.slug === "session"}
+						/>
+					))}
+				</div>
 
-				<Suspense fallback={<ProjectGridSkeleton />}>
-					<Await promise={projects}>
-						{(list) => (
-							<div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-								{list.map((project) => (
-									<ProjectCard key={project.slug} project={project} />
-								))}
-							</div>
-						)}
-					</Await>
-				</Suspense>
-
-				<Link
-					to="/projects"
-					className="mt-10 inline-block font-mono text-xs uppercase tracking-[0.18em] text-accent hover:underline"
-				>
-					Browse all projects →
-				</Link>
+				<div className="mt-8 flex justify-center">
+					<Link
+						to="/projects"
+						className="u-label text-fg-subtle transition-colors hover:text-fg"
+					>
+						Everything else →
+					</Link>
+				</div>
 			</section>
-		</>
+		</Scene>
 	);
 }
 
 /**
- * Hero. Copy lives in `HERO` (src/lib/site.ts) so wording changes do not
- * mean touching markup.
+ * The headline. Set in the condensed display face at marquee scale, because
+ * the thing above a stage is a marquee.
  *
- * The two lines carry different jobs, so they are weighted differently: the
- * lead states what this is and takes the size; the stance is the position and
- * takes the color, with "OPEN" alone in the accent gradient. Giving both lines
- * the gradient would flatten them into one shout.
+ * "OPEN" is the only word that changes weight — the claim is in the first
+ * line, the position is in the second, and putting emphasis on both would
+ * flatten them into one shout.
  */
-function Hero() {
+function Marquee() {
 	return (
-		<section className="mx-auto max-w-6xl px-6 pt-24 pb-16 md:pt-32">
-			<h1 className="max-w-4xl text-balance text-5xl font-semibold tracking-tight md:text-7xl">
+		// Measure widens with the display so the headline is not stuck in an
+		// 896px column in the middle of a 5120px stage.
+		<header className="mx-auto max-w-[56rem] text-center min-[1600px]:max-w-[76rem] min-[2200px]:max-w-[108rem]">
+			<p
+				className="u-label text-fg-subtle"
+				style={{ animation: "rise 700ms ease-out 100ms backwards" }}
+			>
+				{SITE.domains}
+			</p>
+
+			<h1
+				className="u-display mt-6 text-[clamp(2.5rem,min(8.2cqw,15vh),11rem)] text-fg"
+				style={{ animation: "rise 700ms ease-out 200ms backwards" }}
+			>
 				{HERO.lead}
-				<span className="mt-3 block text-3xl font-light text-fg-muted md:text-5xl">
-					{HERO.stance.before}
-					<span className="bg-gradient-to-r from-accent to-accent-alt bg-clip-text font-semibold text-transparent">
-						{HERO.stance.emphasis}
-					</span>
-				</span>
 			</h1>
 
-			<p className="mt-8 max-w-2xl text-lg leading-relaxed text-fg-muted">
+			<p
+				className="u-display mt-3 text-[clamp(1rem,2.9cqw,3.5rem)] text-fg-muted"
+				style={{ animation: "rise 700ms ease-out 320ms backwards" }}
+			>
+				{HERO.stance.before}
+				<span className="text-fg">{HERO.stance.emphasis}</span>
+			</p>
+
+			<p
+				className="mx-auto mt-6 max-w-lg text-sm leading-relaxed text-fg-muted sm:text-base"
+				style={{ animation: "rise 700ms ease-out 440ms backwards" }}
+			>
 				{HERO.subhead}
 			</p>
-		</section>
+		</header>
 	);
 }
 
-function ProjectGridSkeleton() {
+/**
+ * One position on the stage.
+ *
+ * `centre` is not styling for its own sake: Session stands downstage centre
+ * because it coordinates the other two, so it is set larger and lower in the
+ * frame — nearer the audience — the way a director would block it.
+ *
+ * The whole thing is one link, so hover and keyboard focus produce the same
+ * cue (see `.scene:has(...)` in styles.css).
+ */
+function Position({ project, centre }: { project: Project; centre: boolean }) {
 	return (
-		<div
-			className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
-			aria-hidden="true"
+		<Link
+			to="/projects/$slug"
+			params={{ slug: project.slug }}
+			data-id={project.slug}
+			className={`pos group block rounded-card px-2 py-6 text-center transition-transform duration-500 md:px-4 ${
+				centre ? "md:-mb-6 md:pb-10" : "md:mb-4"
+			}`}
+			style={{
+				animation: `rise 800ms ease-out ${560 + (centre ? 80 : 0)}ms backwards`,
+			}}
 		>
-			{[0, 1, 2, 3, 4, 5].map((i) => (
-				<div
-					key={i}
-					className="min-h-56 animate-pulse rounded-card border border-line bg-surface/50"
-				/>
-			))}
-		</div>
+			{/* Channel label — the instrument's colour is the only colour on the
+			    page, so it belongs on the identifier. */}
+			<span className="u-label block" style={{ color: project.accent }}>
+				{project.tagline}
+			</span>
+
+			<span
+				className={`u-display mt-4 block text-fg transition-colors duration-300 ${
+					centre
+						? "text-[clamp(2.25rem,min(6cqw,11vh),8rem)]"
+						: "text-[clamp(1.85rem,min(4.6cqw,8.5vh),6.25rem)]"
+				}`}
+			>
+				{project.name}
+			</span>
+
+			{/* The instrument's own rule, brightening as its beam comes up. */}
+			<span
+				aria-hidden="true"
+				className="mx-auto mt-4 block h-px w-10 opacity-50 transition-all duration-500 group-hover:w-20 group-hover:opacity-100 group-focus-visible:w-20 group-focus-visible:opacity-100"
+				style={{ backgroundColor: project.accent }}
+			/>
+
+			<span className="mx-auto mt-4 block max-w-[26ch] text-sm leading-relaxed text-fg-muted">
+				{project.description}
+			</span>
+		</Link>
 	);
 }

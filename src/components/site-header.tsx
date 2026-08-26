@@ -9,19 +9,22 @@ import { NAV_LINKS, SITE, SOCIAL_LINKS } from "#/lib/site";
  */
 export function SiteHeader() {
 	return (
-		<header className="sticky top-0 z-50 border-b border-line/80 bg-bg/80 backdrop-blur-md">
+		// No background, no rule: the header floats over the stage so the truss
+		// reads as the top of the frame. Anything opaque here re-introduces the
+		// seam that made the beams look like they started halfway down.
+		<header className="absolute inset-x-0 top-0 z-50">
 			<nav
 				aria-label="Primary"
 				className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-6"
 			>
 				<Link
 					to="/"
-					className="font-semibold tracking-tight text-fg transition-colors hover:text-accent"
+					className="u-display text-lg text-fg transition-opacity hover:opacity-70"
 				>
 					{SITE.name}
 				</Link>
 
-				<ul className="flex items-center gap-6 text-sm">
+				<ul className="u-label flex items-center gap-6">
 					{NAV_LINKS.map((link) => (
 						<li key={link.to}>
 							<Link
@@ -35,7 +38,7 @@ export function SiteHeader() {
 					))}
 				</ul>
 
-				<ul className="ml-auto flex items-center gap-5 font-mono text-xs uppercase tracking-[0.18em]">
+				<ul className="u-label ml-auto flex items-center gap-5">
 					{SOCIAL_LINKS.map((link) => (
 						<li key={link.href}>
 							<a

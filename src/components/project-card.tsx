@@ -19,10 +19,7 @@ export function ProjectCard({ project }: { project: Project }) {
 			className="group relative flex min-h-56 flex-col overflow-hidden rounded-card border p-7 transition-all duration-300 hover:-translate-y-0.5"
 		>
 			<div className="mb-8 flex items-start justify-between">
-				<span
-					className="font-mono text-[0.65rem] uppercase tracking-[0.25em] opacity-75"
-					style={{ color: project.accent }}
-				>
+				<span className="u-label opacity-75" style={{ color: project.accent }}>
 					{project.status} v{project.version}
 				</span>
 				<span
@@ -34,13 +31,8 @@ export function ProjectCard({ project }: { project: Project }) {
 			</div>
 
 			<div>
-				<h3 className="text-4xl font-semibold leading-none tracking-tight text-fg">
-					{project.name}
-				</h3>
-				<p
-					className="mt-3 font-mono text-xs uppercase tracking-[0.18em]"
-					style={{ color: project.accent }}
-				>
+				<h3 className="u-display text-[2.5rem] text-fg">{project.name}</h3>
+				<p className="u-label mt-3" style={{ color: project.accent }}>
 					{project.tagline}
 				</p>
 				<p className="mt-4 max-w-[32ch] text-sm leading-relaxed text-fg-muted">

@@ -100,10 +100,10 @@ function ProjectsIndex() {
 	return (
 		<section className="mx-auto max-w-6xl px-6 py-24">
 			<header className="mb-10">
-				<p className="font-mono text-xs uppercase tracking-[0.25em] text-fg-subtle">
-					Catalogue
-				</p>
-				<h1 className="mt-3 text-4xl font-semibold tracking-tight">Projects</h1>
+				<p className="u-label text-fg-subtle">Catalogue</p>
+				<h1 className="u-display mt-4 text-[clamp(2.5rem,6vw,4.5rem)]">
+					Projects
+				</h1>
 			</header>
 
 			<div className="mb-10 flex flex-wrap items-center gap-3">
@@ -117,7 +117,7 @@ function ProjectsIndex() {
 					defaultValue={search.q ?? ""}
 					onChange={(event) => publishQuery(event.target.value)}
 					placeholder="Filter…"
-					className="w-56 rounded border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-subtle"
+					className="w-56 rounded-card border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-subtle"
 				/>
 
 				<label htmlFor="project-status" className="sr-only">
@@ -131,7 +131,7 @@ function ProjectsIndex() {
 							status: (event.target.value || undefined) as typeof search.status,
 						})
 					}
-					className="rounded border border-line-strong bg-surface px-3 py-2 text-sm text-fg"
+					className="rounded-card border border-line-strong bg-surface px-3 py-2 text-sm text-fg"
 				>
 					<option value="">All statuses</option>
 					{PROJECT_STATUSES.map((status) => (
@@ -150,7 +150,7 @@ function ProjectsIndex() {
 					onChange={(event) =>
 						setSearch({ sort: event.target.value as typeof search.sort })
 					}
-					className="rounded border border-line-strong bg-surface px-3 py-2 text-sm text-fg"
+					className="rounded-card border border-line-strong bg-surface px-3 py-2 text-sm text-fg"
 				>
 					{PROJECT_SORTS.map((sort) => (
 						<option key={sort} value={sort}>

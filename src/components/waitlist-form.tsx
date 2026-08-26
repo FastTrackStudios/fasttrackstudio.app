@@ -67,12 +67,12 @@ export function WaitlistForm() {
 					required
 					autoComplete="email"
 					placeholder="you@studio.com"
-					className="min-w-0 flex-1 rounded border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-subtle"
+					className="min-w-0 flex-1 rounded-card border border-line-strong bg-surface px-3 py-3 text-sm text-fg placeholder:text-fg-subtle"
 				/>
 				<button
 					type="submit"
 					disabled={state.kind === "submitting"}
-					className="rounded border border-accent/60 bg-accent/10 px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-accent transition-colors hover:bg-accent/20 disabled:opacity-50"
+					className="u-label rounded-card border border-line-strong bg-surface px-4 py-3 text-fg transition-colors hover:border-fg hover:bg-surface-raised disabled:opacity-50"
 				>
 					{state.kind === "submitting" ? "…" : "Join"}
 				</button>

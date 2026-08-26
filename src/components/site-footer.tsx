@@ -8,9 +8,7 @@ export function SiteFooter() {
 		<footer className="mt-24 border-t border-line bg-surface/40">
 			<div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 md:grid-cols-[2fr_1fr]">
 				<div className="flex flex-col gap-4">
-					<p className="font-mono text-xs uppercase tracking-[0.25em] text-fg-subtle">
-						Stay in the loop
-					</p>
+					<p className="u-label text-fg-subtle">Stay in the loop</p>
 					<p className="max-w-md text-sm leading-relaxed text-fg-muted">
 						Release notes when something ships. No cadence, no marketing.
 					</p>

@@ -1,23 +1,52 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════
+   FastTrackStudio — "on the stage"
+
+   The page is a stage seen from the house: black above, a lit deck below,
+   three instruments hung on a truss. Signal takes stage left, Ignition
+   stage right, Session stands downstage centre — in theatre the strongest
+   position on the stage, which is exactly what it is in the architecture.
+
+   ONE RULE holds the palette together: colour means product identity and
+   nothing else. Signal is blue, Session green, Ignition amber; every piece
+   of interface chrome is greyscale. Nothing borrows a product's colour to
+   decorate itself.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 /* ── Typography ──────────────────────────────────────────────────────────
-   Self-hosted, no CDN. Inter for reading, JetBrains Mono for anything that
-   should read as a machine speaking. Same faces the Dioxus apps ship, so the
-   apex and the subdomains look like one product. */
+   One family, two widths. Archivo is a variable grotesque with a real width
+   axis, so the display face and the body face are the same voice at
+   different settings — the way a console runs one signal at different
+   levels. Condensed + heavy reads as road-case stencil and marquee
+   lettering; normal width sets text. JetBrains Mono carries anything that
+   should read as data: channel labels, versions, patch lines.
+
+   Self-hosted, no CDN — this site has no external dependencies and keeps
+   none. */
 
 @font-face {
-	font-family: "InterVariable";
+	font-family: "Archivo";
 	font-style: normal;
 	font-weight: 100 900;
+	font-stretch: 62% 125%;
 	font-display: swap;
-	src: url("/fonts/InterVariable.woff2") format("woff2");
+	src: url("/fonts/Archivo-latin.woff2") format("woff2");
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+		U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+		U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-	font-family: "InterVariable";
-	font-style: italic;
+	font-family: "Archivo";
+	font-style: normal;
 	font-weight: 100 900;
+	font-stretch: 62% 125%;
 	font-display: swap;
-	src: url("/fonts/InterVariable-Italic.woff2") format("woff2");
+	src: url("/fonts/Archivo-latin-ext.woff2") format("woff2");
+	unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+		U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+		U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+		U+A720-A7FF;
 }
 @font-face {
 	font-family: "JetBrains Mono";
@@ -33,49 +62,38 @@
 	font-display: swap;
 	src: url("/fonts/JetBrainsMono-Bold.woff2") format("woff2");
 }
-@font-face {
-	font-family: "JetBrains Mono";
-	font-style: italic;
-	font-weight: 400;
-	font-display: swap;
-	src: url("/fonts/JetBrainsMono-Italic.woff2") format("woff2");
-}
 
-/* ── Design tokens ───────────────────────────────────────────────────────
-   Every color the shell uses is declared here as a Tailwind v4 theme token,
-   so `bg-bg`, `text-fg`, `border-line`, `text-accent` etc. resolve from one
-   place. A redesign edits this block; it does not sweep the components.
-
-   Dark-first on purpose — that is what the product looks like. To add a light
-   mode later, redefine the same tokens under a `:root[data-theme="light"]`
-   block; nothing downstream needs to change. */
+/* ── Tokens ─────────────────────────────────────────────────────────── */
 
 @theme {
-	--font-sans: "InterVariable", ui-sans-serif, system-ui, sans-serif;
+	--font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
 	--font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
 
-	/* Surfaces, darkest to lightest. */
-	--color-bg: #0d0a14;
-	--color-surface: #131020;
-	--color-surface-raised: #1a1626;
+	/* The room, darkest to lightest. `void` is the fly space above the
+	   truss; `deck` is the lit floor. */
+	--color-void: #08080a;
+	--color-bg: #0a0a0c;
+	--color-deck: #131318;
+	--color-surface: #16161c;
+	--color-surface-raised: #1d1d25;
 
-	/* Text. */
-	--color-fg: #f4f2fa;
-	--color-fg-muted: #a09bb5;
-	--color-fg-subtle: #6b6580;
+	--color-line: #26262f;
+	--color-line-strong: #35354150;
 
-	/* Lines. */
-	--color-line: #241f33;
-	--color-line-strong: #352e4a;
+	/* House white through to the dimmest legible grey. */
+	--color-fg: #ededf1;
+	--color-fg-muted: #9c9ca8;
+	--color-fg-subtle: #63636f;
 
-	/* Brand accents — the violet/pink pair the hero gradient runs between. */
-	--color-accent: #a78bfa;
-	--color-accent-alt: #f0abfc;
+	/* Product identity. Used for nothing else, ever. */
+	--color-signal: #4da3ff;
+	--color-session: #56e39f;
+	--color-ignition: #ffb01f;
 
-	--radius-card: 0.375rem;
+	--radius-card: 2px;
 }
 
-/* ── Base ───────────────────────────────────────────────────────────────── */
+/* ── Base ───────────────────────────────────────────────────────────── */
 
 * {
 	box-sizing: border-box;
@@ -97,20 +115,265 @@ body {
 	background-color: var(--color-bg);
 	color: var(--color-fg);
 	font-family: var(--font-sans);
+	font-stretch: 100%;
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
 
 ::selection {
-	background-color: color-mix(in oklab, var(--color-accent) 35%, transparent);
+	background-color: #ffffff28;
 }
 
-/* Visible keyboard focus everywhere, since the shell restyles most controls. */
+/* Chrome is greyscale, so the focus ring is a plain bright rule — it never
+   competes with a product colour for meaning. */
 :focus-visible {
-	outline: 2px solid var(--color-accent);
-	outline-offset: 2px;
-	border-radius: 2px;
+	outline: 2px solid var(--color-fg);
+	outline-offset: 3px;
+	border-radius: 1px;
 }
+
+/* ── Type roles ─────────────────────────────────────────────────────── */
+
+@layer components {
+	/* Display: condensed and heavy. Stencil on a road case. */
+	.u-display {
+		font-family: var(--font-sans);
+		font-weight: 800;
+		font-stretch: 76%;
+		text-transform: uppercase;
+		letter-spacing: -0.01em;
+		line-height: 0.9;
+	}
+
+	/* Anything that should read as machine output. */
+	.u-label {
+		font-family: var(--font-mono);
+		font-size: 0.6875rem;
+		text-transform: uppercase;
+		letter-spacing: 0.22em;
+		line-height: 1;
+	}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   The stage
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Every instrument reads off these, so a cue is one variable change. */
+.scene {
+	--beam-on: 0.4;
+	--beam-off: 0.07;
+
+	/* THE width of the stage. The rig (beams, pools, clamps) and the content
+	   that stands under it both measure from this one value, so an instrument
+	   can never drift off the performer it is lighting — which is exactly what
+	   happens on an ultrawide display if the beams are sized in vw while the
+	   content is capped by a max-width. */
+	--stage-w: min(110rem, 100%);
+}
+
+/* Ultrawide: let the stage grow rather than stranding it in the middle of a
+   5120px-wide black field, but keep a margin so it still reads as a stage in
+   a room and not as edge-to-edge wallpaper. */
+@media (min-width: 2200px) {
+	.scene {
+		--stage-w: min(180rem, 84%);
+	}
+}
+
+.stage-w {
+	width: var(--stage-w);
+	margin-inline: auto;
+	/*
+	 * Hero type sizes in `cqw` off this box, not `vw` off the window. On a
+	 * 5120px ultrawide the two are wildly different things: 6vw is 307px of
+	 * screen the stage does not occupy, so a vw-based clamp pins to its
+	 * maximum and the headline ends up looking postage-stamp small against
+	 * all that black. Measured against the stage, it scales with the thing it
+	 * actually belongs to.
+	 */
+	container-type: inline-size;
+}
+
+/* ── Truss + beams ──────────────────────────────────────────────────── */
+
+.beam {
+	position: absolute;
+	top: 0;
+	/* Percentage of its own grid cell — see RIG_GRID in stage.tsx. Narrow
+	   enough that adjacent throws barely meet: at 150% the green and amber
+	   overlapped across the middle third and mixed to olive, which is what
+	   pigment does, not light. */
+	width: 112%;
+	height: 84vh;
+	max-height: 68rem;
+	/* A narrow source at the fixture widening to a broad wash on the deck —
+	   the shape a lens actually throws, not a symmetric cone. */
+	clip-path: polygon(45% 0, 55% 0, 100% 100%, 0% 100%);
+	/*
+	 * The light BUILDS DOWNWARD. A real beam is brightest at the lens, but
+	 * rendering it that way dumps saturated colour exactly where the headline
+	 * sits — the type ended up on a green triangle. Keeping the throw faint up
+	 * top and letting it gather toward the deck reads as light landing on the
+	 * performers, which is the thing worth showing anyway.
+	 */
+	background: linear-gradient(
+		to bottom,
+		color-mix(in oklab, var(--beam) 3%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 7%, transparent) 45%,
+		color-mix(in oklab, var(--beam) 17%, transparent) 80%,
+		color-mix(in oklab, var(--beam) 4%, transparent) 96%,
+		transparent 100%
+	);
+	/* Light adds; paint mixes. Screen over a black deck keeps two overlapping
+	   throws reading as two lights rather than as a muddy third colour. */
+	mix-blend-mode: screen;
+	/* Heavy blur: at this scale a clipped polygon shows its edges as hard
+	   diagonal lines, which reads as a shape rather than as light in haze. */
+	filter: blur(34px);
+	opacity: var(--beam-op, var(--beam-on));
+	transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
+	will-change: opacity;
+}
+
+/* Haze makes a beam visible in air; without a little drift it reads as a
+   painted triangle rather than light. */
+.beam::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: inherit;
+	opacity: 0.5;
+	animation: haze 14s ease-in-out infinite alternate;
+}
+
+@keyframes haze {
+	from {
+		transform: translateX(-1.2%) scaleY(0.98);
+	}
+	to {
+		transform: translateX(1.2%) scaleY(1.02);
+	}
+}
+
+/* The pool the beam lands in. */
+.pool {
+	position: absolute;
+	border-radius: 50%;
+	background: radial-gradient(
+		ellipse at center,
+		color-mix(in oklab, var(--beam) 38%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 12%, transparent) 42%,
+		transparent 70%
+	);
+	filter: blur(10px);
+	mix-blend-mode: screen;
+	opacity: var(--beam-op, var(--beam-on));
+	transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── The cue ────────────────────────────────────────────────────────────
+   Engaging one position takes the other two down, like pushing one channel
+   up on a board. It dims the LIGHT only — copy keeps its contrast at every
+   state, so nothing becomes hard to read. */
+
+.scene:has(.pos:hover) .beam,
+.scene:has(.pos:hover) .pool,
+.scene:has(.pos:focus-within) .beam,
+.scene:has(.pos:focus-within) .pool {
+	--beam-op: var(--beam-off);
+}
+
+.scene:has(.pos[data-id="signal"]:hover) [data-beam="signal"],
+.scene:has(.pos[data-id="signal"]:focus-within) [data-beam="signal"],
+.scene:has(.pos[data-id="session"]:hover) [data-beam="session"],
+.scene:has(.pos[data-id="session"]:focus-within) [data-beam="session"],
+.scene:has(.pos[data-id="ignition"]:hover) [data-beam="ignition"],
+.scene:has(.pos[data-id="ignition"]:focus-within) [data-beam="ignition"] {
+	--beam-op: 1;
+}
+
+/* Phones: the rig stacks, so three separated beams stop meaning anything.
+   Spread them less and take them down to a wash — ambient light in a small
+   room rather than three specials pointing at nothing. */
+@media (max-width: 48rem) {
+	.scene {
+		--beam-on: 0.5;
+	}
+	.beam {
+		width: 190%;
+	}
+}
+
+/* ── Deck ───────────────────────────────────────────────────────────────
+   A real plane in perspective rather than a gradient pretending to be one,
+   so the plank lines converge the way floorboards do. */
+
+.deck {
+	perspective: 46vh;
+	perspective-origin: 50% 0%;
+}
+
+.deck__plane {
+	position: absolute;
+	inset: -60% -40% 0 -40%;
+	transform: rotateX(74deg);
+	transform-origin: 50% 0%;
+	background:
+		repeating-linear-gradient(
+			to right,
+			transparent 0 7.5rem,
+			#ffffff09 7.5rem 7.55rem
+		),
+		linear-gradient(to bottom, var(--color-deck) 0%, var(--color-void) 72%);
+}
+
+/* ── Visualiser ─────────────────────────────────────────────────────────
+   Sits on the horizon, upstage of the performers, in greyscale — it is the
+   room responding, not a fourth product, so it never takes a colour. */
+
+.viz__bar {
+	width: 100%;
+	background: linear-gradient(to top, #ffffff26, #ffffff08);
+	transform-origin: 50% 100%;
+	animation: viz 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes viz {
+	from {
+		transform: scaleY(0.28);
+	}
+	to {
+		transform: scaleY(1);
+	}
+}
+
+/* ── House lights up ────────────────────────────────────────────────────
+   Page load runs as a lighting cue: the deck is there first, then the three
+   specials come up in turn. It happens once and it is quiet. */
+
+@keyframes cue-up {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: var(--beam-on);
+	}
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(0.75rem);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────
+   The stage is still lit; it simply stops moving. */
 
 @media (prefers-reduced-motion: reduce) {
 	html {
@@ -122,5 +385,11 @@ body {
 		animation-duration: 0.01ms !important;
 		animation-iteration-count: 1 !important;
 		transition-duration: 0.01ms !important;
+	}
+	.beam::after {
+		display: none;
+	}
+	.viz__bar {
+		transform: scaleY(0.55);
 	}
 }

@@ -85,15 +85,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function NotFound() {
 	return (
 		<section className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-6 py-32">
-			<p className="font-mono text-xs uppercase tracking-[0.25em] text-fg-subtle">
-				404
-			</p>
-			<h1 className="text-4xl font-semibold tracking-tight">
+			<p className="u-label text-fg-subtle">404</p>
+			<h1 className="u-display text-[clamp(2.25rem,5vw,3.5rem)]">
 				That page does not exist.
 			</h1>
 			<Link
 				to="/"
-				className="font-mono text-xs uppercase tracking-[0.18em] text-accent hover:underline"
+				className="u-label text-fg underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-fg"
 			>
 				Back home
 			</Link>
@@ -104,13 +102,11 @@ function NotFound() {
 function RootError({ error }: { error: Error }) {
 	return (
 		<section className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-6 py-32">
-			<p className="font-mono text-xs uppercase tracking-[0.25em] text-fg-subtle">
-				Error
-			</p>
-			<h1 className="text-4xl font-semibold tracking-tight">
+			<p className="u-label text-fg-subtle">Error</p>
+			<h1 className="u-display text-[clamp(2.25rem,5vw,3.5rem)]">
 				Something went wrong.
 			</h1>
-			<pre className="max-w-full overflow-x-auto rounded border border-line bg-surface p-4 font-mono text-xs text-fg-muted">
+			<pre className="max-w-full overflow-x-auto rounded-card border border-line bg-surface p-4 font-mono text-xs text-fg-muted">
 				{error.message}
 			</pre>
 		</section>
