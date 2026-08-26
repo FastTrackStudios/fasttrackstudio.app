@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import { HeroActions } from "#/components/hero-actions";
+import { PlatformSupport } from "#/components/platform-support";
 import { Scene } from "#/components/stage";
 import { fetchStagePositions } from "#/fn/projects";
 import type { Project } from "#/lib/projects";
@@ -24,7 +26,7 @@ function Home() {
 
 	return (
 		<Scene>
-			<section className="stage-w flex min-h-[100svh] flex-col px-6 pt-20 pb-10">
+			<section className="stage-w flex min-h-[100svh] flex-col px-6 pt-16 pb-8">
 				<Marquee />
 
 				{/*
@@ -32,7 +34,7 @@ function Home() {
 				  Session downstage centre, Ignition at stage right. `items-end`
 				  stands them on the deck rather than floating them in the frame.
 				*/}
-				<div className="mt-auto grid grid-cols-1 items-end gap-12 pt-6 md:grid-cols-3 md:gap-6">
+				<div className="mt-auto grid grid-cols-1 items-end gap-10 pt-4 md:grid-cols-3 md:gap-6">
 					{positions.map((project) => (
 						<Position
 							key={project.slug}
@@ -42,7 +44,7 @@ function Home() {
 					))}
 				</div>
 
-				<div className="mt-8 flex justify-center">
+				<div className="mt-6 flex justify-center">
 					<Link
 						to="/projects"
 						className="u-label text-fg-subtle transition-colors hover:text-fg"
@@ -76,7 +78,7 @@ function Marquee() {
 			</p>
 
 			<h1
-				className="u-display mt-6 text-[clamp(2.5rem,min(8.2cqw,15vh),11rem)] text-fg"
+				className="u-display mt-6 text-[clamp(2.25rem,min(7.6cqw,13.5vh),11rem)] text-fg"
 				style={{ animation: "rise 700ms ease-out 200ms backwards" }}
 			>
 				{HERO.lead}
@@ -91,11 +93,24 @@ function Marquee() {
 			</p>
 
 			<p
-				className="mx-auto mt-6 max-w-lg text-sm leading-relaxed text-fg-muted sm:text-base"
+				className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-fg-muted sm:text-base"
 				style={{ animation: "rise 700ms ease-out 440ms backwards" }}
 			>
 				{HERO.subhead}
 			</p>
+
+			{/* Platforms as marks rather than a sentence: three logos are read at
+			    a glance, where "runs on Linux, macOS and Windows" has to be read
+			    word by word and was competing with the subhead for the same
+			    breath. */}
+			<PlatformSupport
+				className="mt-6"
+				style={{ animation: "rise 700ms ease-out 540ms backwards" }}
+			/>
+
+			<div style={{ animation: "rise 700ms ease-out 620ms backwards" }}>
+				<HeroActions className="mt-6" />
+			</div>
 		</header>
 	);
 }

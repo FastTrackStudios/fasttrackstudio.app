@@ -38,8 +38,26 @@ export const HERO = {
 	lead: "The Complete AV Toolkit",
 	stance: { before: "The Future is ", emphasis: "OPEN" },
 	subhead:
-		"One rig instead of three vendors. Open formats, documented protocols, and it runs on Linux, macOS and Windows.",
+		"One rig instead of three vendors. Open formats and documented protocols.",
 } as const;
+
+/**
+ * The hero's calls to action, in priority order.
+ *
+ * `soon` marks something that does not exist yet. It renders as a disabled
+ * control rather than a link, because shipping a button that 404s costs more
+ * trust than not showing it at all — and saying "soon" out loud is a better
+ * signal than silence.
+ */
+export const ACTIONS = [
+	{
+		kind: "external",
+		label: "Source",
+		href: "https://github.com/FastTrackStudios",
+	},
+	{ kind: "internal", label: "Contribute", to: "/contribute" },
+	{ kind: "soon", label: "Forum" },
+] as const;
 
 /**
  * Sibling apps that deploy to their own subdomain of this apex.
@@ -59,7 +77,10 @@ export const SUBDOMAINS = {
 export type SubdomainKey = keyof typeof SUBDOMAINS;
 
 /** Primary nav. Internal links are router `to` paths. */
-export const NAV_LINKS = [{ label: "Projects", to: "/projects" }] as const;
+export const NAV_LINKS = [
+	{ label: "Projects", to: "/projects" },
+	{ label: "Contribute", to: "/contribute" },
+] as const;
 
 /**
  * GitHub is the canonical forge — every project link points there. The old

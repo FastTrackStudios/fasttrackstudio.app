@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { GitHubIcon } from "#/components/platform-support";
 import { NAV_LINKS, SITE, SOCIAL_LINKS } from "#/lib/site";
 
 /**
@@ -15,16 +16,16 @@ export function SiteHeader() {
 		<header className="absolute inset-x-0 top-0 z-50">
 			<nav
 				aria-label="Primary"
-				className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-6"
+				className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-5 sm:gap-8 sm:px-6"
 			>
 				<Link
 					to="/"
-					className="u-display text-lg text-fg transition-opacity hover:opacity-70"
+					className="u-display shrink-0 text-base text-fg transition-opacity hover:opacity-70 sm:text-lg"
 				>
 					{SITE.name}
 				</Link>
 
-				<ul className="u-label flex items-center gap-6">
+				<ul className="u-label flex items-center gap-4 sm:gap-6">
 					{NAV_LINKS.map((link) => (
 						<li key={link.to}>
 							<Link
@@ -38,16 +39,19 @@ export function SiteHeader() {
 					))}
 				</ul>
 
-				<ul className="u-label ml-auto flex items-center gap-5">
+				{/* The mark alone, not the word: it is the only outbound link up
+				    here and a logo reads faster than five tracked capitals. The
+				    accessible name still says "GitHub". */}
+				<ul className="ml-auto flex shrink-0 items-center gap-5">
 					{SOCIAL_LINKS.map((link) => (
 						<li key={link.href}>
 							<a
 								href={link.href}
 								target="_blank"
 								rel="noreferrer noopener"
-								className="text-fg-subtle transition-colors hover:text-fg"
+								className="block text-fg-muted transition-colors hover:text-fg"
 							>
-								{link.label}
+								<GitHubIcon className="h-5 w-5" />
 							</a>
 						</li>
 					))}
