@@ -1,11 +1,17 @@
 # Deploys fasttrackstudio.app.
 #
-#   docker build -> registry.starcommand.live:30050/fts-www:{latest,sha-<short>}
+#   nix build .#image -> registry.starcommand.live:30050/fts-www:{latest,sha-…}
 #
 # Runs on the SELF-HOSTED runner labeled `nix-host` (THEBATTLESHIP): the
 # in-cluster registry is LAN-only and unreachable from GitHub-hosted runners.
-# That host already has dockerd with the registry declared insecure (see
-# ~/.flake modules/system/virtualization.nix), so no login or TLS setup here.
+#
+# NO DOCKER ANYWHERE. That runner executes as the `github-runner` user, which
+# has no docker on PATH and is not in the `docker` group — and putting it
+# there would hand CI effectively-root access to the workstation. So the
+# image is built as an ordinary Nix derivation (dockerTools.streamLayeredImage,
+# see nix/image.nix) and streamed straight into skopeo. Same shape as the
+# FastTrackStudio monorepo's fts-site deploy. The repo's Dockerfile still
+# works for local runs and non-Nix hosts; it just is not what CI uses.
 #
 # argocd-image-updater (digest strategy on the `latest` tag) rolls the
 # Deployment; "Verify live" then polls /version.json until the cluster serves
@@ -26,6 +32,9 @@ concurrency:
 env:
   REGISTRY: registry.starcommand.live:30050
   IMAGE: fts-www
+  # Newer skopeo rejects the host's v1 registries.conf; we name the registry
+  # explicitly everywhere, so use an empty (valid) config.
+  CONTAINERS_REGISTRIES_CONF: /dev/null
   # Polled by Verify live. The starcommand host rides the existing wildcard,
   # so it works before external DNS for the apex is cut over. Point this at
   # https://fasttrackstudio.app once the apex resolves to the cluster edge.
@@ -46,21 +55,46 @@ jobs:
           echo "sha=sha-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-      - name: Build image
+      # bun + node come from the flake's devShell, so CI and a local
+      # `nix develop` build with the same versions. vite runs under NODE, not
+      # bun: building under bun resolves the `bun` export condition and bakes
+      # srvx's Bun server adapter into .output, which then dies with "Bun is
+      # not defined" under the node runtime in the image.
+      - name: Build app
         run: |
           set -euo pipefail
-          docker build \
-            --build-arg "GIT_SHA=${GITHUB_SHA}" \
-            --build-arg "BUILD_TIME=${{ steps.tags.outputs.built_at }}" \
-            -t "${REGISTRY}/${IMAGE}:${{ steps.tags.outputs.sha }}" \
-            -t "${REGISTRY}/${IMAGE}:latest" \
-            .
+          nix develop --command bash -euo pipefail -c '
+            bun install --frozen-lockfile
+            node node_modules/vite/bin/vite.js build
+          '
+
+      - name: Build image
+        id: image
+        env:
+          FTS_OUTPUT: ${{ github.workspace }}/.output
+          FTS_REV: ${{ github.sha }}
+          FTS_TAG: latest
+          FTS_BUILD_TIME: ${{ steps.tags.outputs.built_at }}
+        run: |
+          set -euo pipefail
+          # --impure: nix/image.nix reads the built .output path from the
+          # environment. Everything else about the image is pinned by flake.lock.
+          streamer="$(nix build --impure --no-link --print-out-paths .#image)"
+          echo "streamer=$streamer" >> "$GITHUB_OUTPUT"
 
       - name: Push image
         run: |
           set -euo pipefail
-          docker push "${REGISTRY}/${IMAGE}:${{ steps.tags.outputs.sha }}"
-          docker push "${REGISTRY}/${IMAGE}:latest"
+          "${{ steps.image.outputs.streamer }}" | nix develop --command skopeo \
+            --insecure-policy copy --dest-tls-verify=false --dest-no-creds \
+            docker-archive:/dev/stdin \
+            "docker://${REGISTRY}/${IMAGE}:latest"
+          nix develop --command skopeo \
+            --insecure-policy copy \
+            --src-tls-verify=false --src-no-creds \
+            --dest-tls-verify=false --dest-no-creds \
+            "docker://${REGISTRY}/${IMAGE}:latest" \
+            "docker://${REGISTRY}/${IMAGE}:${{ steps.tags.outputs.sha }}"
 
       - name: Verify live
         run: |

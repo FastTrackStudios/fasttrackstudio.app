@@ -1,5 +1,10 @@
 # fasttrackstudio.app — TanStack Start (Nitro node-server preset).
 #
+# NOTE: CI does NOT use this file. The `nix-host` runner has no docker, so
+# the deployed image is built by nix/image.nix instead. This Dockerfile is
+# for local runs and any non-Nix host; keep the two in step if you change
+# the runtime contract (port, WAITLIST_FILE, GIT_SHA).
+#
 # Three stages, and the split matters:
 #
 #   deps    bun installs from bun.lock (fast, and the lockfile this repo owns)

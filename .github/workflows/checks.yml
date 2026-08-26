@@ -17,13 +17,6 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # The route tree is committed; a stale one means the app builds
-      # differently than the routes on disk say it should.
-      - name: Route tree is up to date
-        run: |
-          bun run generate-routes
-          git diff --exit-code -- src/routeTree.gen.ts
-
       - name: Lint + format
         run: bunx biome ci .
 
@@ -32,3 +25,11 @@ jobs:
 
       - name: Build
         run: bun run build
+
+      # The route tree is committed, and the VITE PLUGIN is what generates
+      # it — the standalone `tsr generate` CLI emits a subtly different file
+      # (it omits the `Register` declaration that types the router and `ssr`).
+      # So this has to run AFTER the build, comparing against what the build
+      # actually produced.
+      - name: Route tree is up to date
+        run: git diff --exit-code -- src/routeTree.gen.ts
