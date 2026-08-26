@@ -63,19 +63,25 @@ export function StageBackdrop() {
 
 			{/* Side booms — the wide, colourless cross-light that fills a room
 			    with haze. Always on, always quiet; they are the air, not the
-			    subject. */}
+			    subject.
+
+			    Anchored radials, not linear gradients: a linear ramp across a
+			    tall narrow box has not reached transparent by the time it meets
+			    the box's inner edge, so it drew a vertical seam down the frame.
+			    A radial from the corner falls off in every direction and has no
+			    edge to show. */}
 			<div
-				className="absolute inset-y-0 left-0 w-1/3"
+				className="boom absolute inset-y-0 left-0 w-1/2"
 				style={{
 					background:
-						"linear-gradient(105deg, #ffffff0e 0%, #ffffff05 30%, transparent 62%)",
+						"radial-gradient(ellipse 95% 60% at 0% 0%, #ffffff0c 0%, #ffffff05 34%, #ffffff02 54%, transparent 74%)",
 				}}
 			/>
 			<div
-				className="absolute inset-y-0 right-0 w-1/3"
+				className="boom absolute inset-y-0 right-0 w-1/2"
 				style={{
 					background:
-						"linear-gradient(255deg, #ffffff0e 0%, #ffffff05 30%, transparent 62%)",
+						"radial-gradient(ellipse 95% 60% at 100% 0%, #ffffff0c 0%, #ffffff05 34%, #ffffff02 54%, transparent 74%)",
 				}}
 			/>
 
@@ -89,13 +95,13 @@ export function StageBackdrop() {
 			    every beam stays over its own performer at any width. */}
 			<div className="stage-w absolute inset-y-0 left-1/2 -translate-x-1/2">
 				{/* The truss the instruments hang from. */}
-				<div className="absolute inset-x-0 top-0 h-px bg-line" />
+				<div className="truss absolute inset-x-0 top-0 h-px bg-line" />
 
 				<div className={`${RIG_GRID} absolute inset-0`}>
 					{RIG.map((fixture, i) => (
 						<div key={fixture.id} className="relative">
 							{/* Clamp: where this instrument is hung. */}
-							<div className="absolute top-0 left-1/2 h-3 w-6 -translate-x-1/2 rounded-b-sm border-x border-b border-line bg-surface" />
+							<div className="truss absolute top-0 left-1/2 h-3 w-6 -translate-x-1/2 rounded-b-sm border-x border-b border-line bg-surface" />
 
 							<div
 								data-beam={fixture.id}

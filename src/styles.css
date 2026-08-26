@@ -310,6 +310,32 @@ body {
 		display: none;
 	}
 
+	/*
+	 * The deck goes too. It is anchored to the bottom of the scene, and once
+	 * the products stack the scene is tall enough that the plane's top edge
+	 * landed in the MIDDLE of the last product — a horizontal band straight
+	 * through Ignition. A floor only reads as a floor when the performers are
+	 * standing on it in one frame, which is a side-by-side idea.
+	 */
+	.deck {
+		display: none;
+	}
+
+	/*
+	 * The truss and its clamps go with the beams. Left up there with nothing
+	 * hanging from them they are three small grey tabs and a hairline pinned
+	 * to the top edge — hardware for a rig that is not there.
+	 */
+	.truss {
+		display: none;
+	}
+
+	/* Booms are the room's haze. On a small dark frame they were the only
+	   thing left in the upper half and started reading as streaks. */
+	.boom {
+		opacity: 0.45;
+	}
+
 
 }
 
@@ -333,12 +359,39 @@ body {
 	inset: -12% -18%;
 	pointer-events: none;
 	z-index: 0;
+	/* The spot itself, landing on the name. */
 	background: radial-gradient(
-		ellipse 58% 44% at calc(50% + var(--side, -1) * 20%) 32%,
-		color-mix(in oklab, var(--beam) 34%, transparent) 0%,
-		color-mix(in oklab, var(--beam) 15%, transparent) 36%,
-		color-mix(in oklab, var(--beam) 5%, transparent) 58%,
+		ellipse 54% 40% at calc(50% + var(--side, -1) * 16%) 32%,
+		color-mix(in oklab, var(--beam) 30%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 13%, transparent) 36%,
+		color-mix(in oklab, var(--beam) 4%, transparent) 58%,
 		transparent 76%
+	);
+}
+
+/*
+ * The throw: a long soft shaft angling in from the wing, so the spot reads as
+ * something ARRIVING rather than as a glow that happens to be there.
+ *
+ * It is a rotated radial gradient, not a clipped wedge. The gradient fades to
+ * transparent well inside the element's own box, so the box edge can never
+ * show — which is what made every clipped and masked version look like a grey
+ * rectangle.
+ */
+.pos-light::before {
+	content: "";
+	position: absolute;
+	top: -55%;
+	left: calc(50% + var(--side, -1) * 46%);
+	width: 130%;
+	height: 200%;
+	transform: translateX(-50%) rotate(calc(var(--side, -1) * 30deg));
+	background: radial-gradient(
+		ellipse 20% 46% at 50% 24%,
+		color-mix(in oklab, var(--beam) 22%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 9%, transparent) 34%,
+		color-mix(in oklab, var(--beam) 3%, transparent) 55%,
+		transparent 72%
 	);
 }
 
