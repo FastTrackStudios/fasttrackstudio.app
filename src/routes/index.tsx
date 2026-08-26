@@ -26,13 +26,18 @@ function Home() {
 
 	return (
 		<Scene>
-			<section className="stage-w flex min-h-[100svh] flex-col px-6 pt-14 pb-6">
+			<section className="stage-w flex min-h-[100svh] flex-col px-6 pt-14 pb-[15vh]">
 				<Marquee />
 
 				{/*
 				  The rig. Three positions across the stage: Signal at stage left,
 				  Session downstage centre, Ignition at stage right. `items-end`
 				  stands them on the deck rather than floating them in the frame.
+
+				  The section carries a deep bottom padding so `mt-auto` stops
+				  short of the floor: pushed all the way down, the products sat
+				  BELOW the pools their own beams were throwing — lit stage, dark
+				  performers. They stand in the light now.
 				*/}
 				<div className="mt-auto grid grid-cols-1 items-end gap-10 pt-2 md:grid-cols-3 md:gap-6">
 					{positions.map((project) => (
@@ -92,19 +97,12 @@ function Marquee() {
 				<span className="text-fg">{HERO.stance.emphasis}</span>
 			</p>
 
-			<p
-				className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-fg-muted sm:text-base"
-				style={{ animation: "rise 700ms ease-out 440ms backwards" }}
-			>
-				{HERO.subhead}
-			</p>
-
 			{/* Platforms as marks rather than a sentence: three logos are read at
 			    a glance, where "runs on Linux, macOS and Windows" has to be read
 			    word by word and was competing with the subhead for the same
 			    breath. */}
 			<PlatformSupport
-				className="mt-6"
+				className="mt-9"
 				style={{ animation: "rise 700ms ease-out 540ms backwards" }}
 			/>
 

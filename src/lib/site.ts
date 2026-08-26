@@ -29,16 +29,11 @@ export const SITE = {
  *
  * `lead` is the claim, `stance` is the position — the second line is
  * deliberately shorter, with only `emphasis` at full brightness.
- *
- * `subhead` must not restate the three products: they are set in display type
- * immediately below it on the landing page, so the sentence earns its place by
- * carrying what they cannot — that this is one system, and where it runs.
+
  */
 export const HERO = {
 	lead: "The Complete AV Toolkit",
 	stance: { before: "The Future is ", emphasis: "OPEN" },
-	subhead:
-		"One rig instead of three vendors. Open formats and documented protocols.",
 } as const;
 
 /**
