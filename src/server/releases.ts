@@ -1,6 +1,14 @@
 /**
  * Live version numbers, read from GitHub.
  *
+ * CURRENTLY UNUSED, ON PURPOSE. The tags across these repos are wrong and
+ * are being renumbered, so the site would report versions that are about to
+ * change — no version is shown anywhere at the moment. This module is kept
+ * because the work is done and correct (the semver picking below is the part
+ * that is easy to get wrong); switch it back on by mapping the exported
+ * functions in `projects.ts` through `withLiveVersion` again and restoring
+ * the Version row on the project page.
+ *
  * SERVER-ONLY. The catalogue in `projects.ts` carries a hand-written
  * `version` as the floor; this module replaces it with whatever the repo
  * actually published, so the site stops drifting from the tags without

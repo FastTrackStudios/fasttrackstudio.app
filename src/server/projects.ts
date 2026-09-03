@@ -13,7 +13,15 @@
 import "@tanstack/react-start/server-only";
 
 import type { Project, ProjectSearch } from "#/lib/projects";
-import { withLiveVersion } from "#/server/releases";
+
+// NOT WIRED IN. `withLiveVersion` reads each repo's published version from
+// GitHub and is ready to use, but the tags across these repos are wrong right
+// now and are being renumbered, so the site would be reporting numbers that
+// are about to change. Versions are therefore not displayed at all for the
+// moment — see the note in src/server/releases.ts. Re-enable by mapping the
+// exported functions below through it again and restoring the `Version` row
+// on the project page.
+// import { withLiveVersion } from "#/server/releases";
 
 /**
  * Catalogue order is deliberate: the three products that define the system
@@ -159,8 +167,7 @@ const PROJECTS: readonly Project[] = [
 export function stagePositions(): Project[] {
 	return ["signal", "session", "ignition"]
 		.map((slug) => PROJECTS.find((p) => p.slug === slug))
-		.filter((p): p is Project => p !== undefined)
-		.map(withLiveVersion);
+		.filter((p): p is Project => p !== undefined);
 }
 
 /**
@@ -169,13 +176,12 @@ export function stagePositions(): Project[] {
  * as if it were.
  */
 export function chartFormat(): Project | undefined {
-	const project = PROJECTS.find((p) => p.slug === "keyflow");
-	return project ? withLiveVersion(project) : undefined;
+	return PROJECTS.find((project) => project.slug === "keyflow");
 }
 
 /** Every project, in catalogue order. */
 export function listProjects(): readonly Project[] {
-	return PROJECTS.map(withLiveVersion);
+	return PROJECTS;
 }
 
 /** Filtered + sorted view backing the `/projects` index. */
@@ -190,17 +196,14 @@ export function queryProjects(search: ProjectSearch): Project[] {
 			.includes(needle);
 	});
 
-	return [...matched]
-		.sort((a, b) =>
-			(search.sort ?? "name") === "status"
-				? a.status.localeCompare(b.status) || a.name.localeCompare(b.name)
-				: a.name.localeCompare(b.name),
-		)
-		.map(withLiveVersion);
+	return [...matched].sort((a, b) =>
+		(search.sort ?? "name") === "status"
+			? a.status.localeCompare(b.status) || a.name.localeCompare(b.name)
+			: a.name.localeCompare(b.name),
+	);
 }
 
 /** One project, or `undefined` when the slug does not exist. */
 export function findProject(slug: string): Project | undefined {
-	const project = PROJECTS.find((p) => p.slug === slug);
-	return project ? withLiveVersion(project) : undefined;
+	return PROJECTS.find((project) => project.slug === slug);
 }

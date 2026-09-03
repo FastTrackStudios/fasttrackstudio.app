@@ -26,8 +26,11 @@ export function ProjectCard({ project }: { project: Project }) {
 			<ProjectMotif slug={project.slug} color={project.accent} />
 
 			<div className="relative z-10 mb-8 flex items-start justify-between">
+				{/* Status only. Version numbers are deliberately not shown while
+				    the repos' tags are being renumbered — see the note at the top
+				    of src/server/projects.ts. */}
 				<span className="u-label text-[var(--accent)] opacity-75">
-					{project.status} v{project.version}
+					{project.status}
 				</span>
 				<span className="font-mono text-lg tracking-tight text-[var(--accent)] opacity-80">
 					{project.glyph}

@@ -88,15 +88,13 @@ function ProjectDetail() {
 				</div>
 			</header>
 
-			<dl className="u-label mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3">
+			{/* No Version row: the repos' tags are being renumbered, so any
+			    number here would be wrong within the week. src/server/releases.ts
+			    can put it back — and make it live — in one line. */}
+			<dl className="u-label mt-8 grid grid-cols-2 gap-6">
 				<div>
 					<dt className="text-fg-subtle">Status</dt>
 					<dd className="mt-1 text-fg">{project.status}</dd>
-				</div>
-				<div>
-					{/* Read from GitHub at render time — see src/server/releases.ts. */}
-					<dt className="text-fg-subtle">Version</dt>
-					<dd className="mt-1 text-fg">{project.version}</dd>
 				</div>
 				<div>
 					<dt className="text-fg-subtle">Source</dt>

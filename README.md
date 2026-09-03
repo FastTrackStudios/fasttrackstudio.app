@@ -68,10 +68,14 @@ would add a suspense boundary that never pays for itself.
 
 The one thing that must never block a render is GitHub; see below.
 
-### Live versions
+### Live versions (built, switched off)
 
-`src/server/releases.ts` replaces each project's hand-written `version` with
-what its repo actually published (latest release, else highest semver tag), so
+**No version is displayed anywhere right now.** The tags across the product
+repos are wrong and are being renumbered, so the site would report numbers
+that are about to change.
+
+`src/server/releases.ts` is finished and ready: it replaces each project's
+hand-written `version` with what its repo actually published (latest release, else highest semver tag), so
 the site stops drifting from the tags. Three rules:
 
 1. **A render never waits on GitHub.** It reads a process-local cache and
@@ -84,6 +88,11 @@ the site stops drifting from the tags. Three rules:
 
 `/tags` is ordered by ref name, not version — `v0.10.0` sorts *below* `v0.9.0`
 there — so the highest semver is chosen rather than the first entry.
+
+To switch it on once the tags are settled: map the exported functions in
+`src/server/projects.ts` through `withLiveVersion` again, and restore the
+`Version` row on `src/routes/projects/$slug.tsx` and the version on the
+catalogue tile.
 
 ### Product icons and the Keyflow preview
 
