@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import { ChartFlow } from "#/components/chart-flow";
 import { ProjectIcon } from "#/components/project-icon";
 import type { Project } from "#/lib/projects";
@@ -102,14 +104,49 @@ export function ChartBand({ project }: { project: Project }) {
  * CDP and captures exactly one chart cycle, so the loop is seamless and
  * re-recording it is one command when the design changes.
  *
- * `<video>` rather than a GIF: the same eleven seconds is ~40x smaller as
- * video, and stays sharp instead of being quantised to 256 colours. The
- * poster is the first frame, so nothing pops in.
+ * `<video>` rather than a GIF: the same loop is half the bytes as video, at
+ * 1000px/25fps against 760px/14fps, and stays sharp instead of being
+ * quantised to 256 colours. The poster is the first frame, so nothing pops in.
  */
 function ChartDemo({ project }: { project: Project }) {
+	const video = useRef<HTMLVideoElement>(null);
+
+	/*
+	 * The stylesheet's `prefers-reduced-motion` block zeroes every animation
+	 * on the page, but CSS cannot stop a video — without this, the one thing
+	 * that moves most would be the one thing that ignored the request.
+	 *
+	 * Done in an effect rather than by rendering `autoPlay` conditionally:
+	 * the server has no media queries, so branching on it during render would
+	 * produce markup that disagrees with the client and a hydration error.
+	 * The video is paused on mount instead, and falls back to its poster —
+	 * which is the first frame, so the figure still shows the chart.
+	 */
+	useEffect(() => {
+		const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+		function apply() {
+			const element = video.current;
+			if (!element) return;
+			if (media.matches) {
+				element.pause();
+				element.currentTime = 0;
+			} else {
+				// Rejected autoplay is normal (a policy, a background tab); there
+				// is nothing to recover, so the promise is simply not awaited.
+				void element.play().catch(() => {});
+			}
+		}
+
+		apply();
+		media.addEventListener("change", apply);
+		return () => media.removeEventListener("change", apply);
+	}, []);
+
 	return (
 		<figure className="m-0 w-full overflow-hidden rounded-card border border-line bg-bg">
 			<video
+				ref={video}
 				src="/media/keyflow-preview.mp4"
 				poster="/media/keyflow-preview.jpg"
 				// A silent looping demo, so it may autoplay: `muted` and
