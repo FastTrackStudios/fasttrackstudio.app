@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import { ProductLink } from "#/components/product-link";
+import { ProjectIcon } from "#/components/project-icon";
+
 import { fetchProject } from "#/fn/projects";
 import { SITE } from "#/lib/site";
 
@@ -38,21 +41,51 @@ function ProjectDetail() {
 	const project = Route.useLoaderData();
 
 	return (
-		<article className="mx-auto max-w-3xl px-6 py-24">
+		<article
+			className="mx-auto max-w-3xl px-6 py-24"
+			style={{ ["--accent" as string]: project.accent }}
+		>
 			<Link to="/projects" className="u-label text-fg-subtle hover:text-fg">
 				← Projects
 			</Link>
 
 			<header className="mt-8 border-b border-line pb-8">
-				<p className="u-label" style={{ color: project.accent }}>
-					{project.tagline}
-				</p>
-				<h1 className="u-display mt-4 text-[clamp(3rem,7vw,5.5rem)]">
+				<div className="flex items-center gap-4">
+					<ProjectIcon project={project} size={48} className="rounded-[22%]" />
+					<p className="u-label text-[var(--accent)]">{project.tagline}</p>
+				</div>
+
+				<h1 className="u-display mt-5 text-[clamp(3rem,7vw,5.5rem)]">
 					{project.name}
 				</h1>
 				<p className="mt-6 text-lg leading-relaxed text-fg-muted">
 					{project.description}
 				</p>
+
+				{/* The same three capabilities the stage shows, so a product reads
+				    the same on its own page as it does on the front one. */}
+				<ul className="mt-8 flex max-w-md flex-col gap-2.5">
+					{project.capabilities.map((capability) => (
+						<li key={capability.label} className="flex items-baseline gap-3">
+							<span
+								aria-hidden="true"
+								className="mt-[0.45rem] h-px w-3 shrink-0 bg-[var(--accent)] opacity-70"
+							/>
+							<span className="text-sm leading-snug text-fg-muted">
+								{capability.label}
+								{capability.tags ? (
+									<span className="u-label mt-1.5 block text-fg-subtle">
+										{capability.tags.join(" · ")}
+									</span>
+								) : null}
+							</span>
+						</li>
+					))}
+				</ul>
+
+				<div className="mt-9">
+					<ProductLink project={project} />
+				</div>
 			</header>
 
 			<dl className="u-label mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3">
@@ -61,6 +94,7 @@ function ProjectDetail() {
 					<dd className="mt-1 text-fg">{project.status}</dd>
 				</div>
 				<div>
+					{/* Read from GitHub at render time — see src/server/releases.ts. */}
 					<dt className="text-fg-subtle">Version</dt>
 					<dd className="mt-1 text-fg">{project.version}</dd>
 				</div>
