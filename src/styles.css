@@ -472,6 +472,47 @@ body {
 	}
 }
 
+/* ── Keyflow's accent sweep ──────────────────────────────────────────────
+   Carried over from keyflow.fasttrackstudio.app so the word reads the same
+   in both places. The gradient is clipped to the glyphs, so the element must
+   stay one unbroken line box — a wrap restarts the sweep on the second line.
+
+   `--accent` is set by the band; the far stop is a lighter tint of it rather
+   than a second hardcoded colour, so changing Keyflow's hue changes both. */
+
+.accel {
+	color: var(--accent);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+	.accel {
+		/* Violet at the ends, blue through the middle — the same two stops
+		   Keyflow's own dark theme sweeps between (`--accent` / `--accent-far`
+		   in its site.css). Travelling across the wheel is what makes the
+		   movement read as movement rather than as a brightness flicker. */
+		background-image: linear-gradient(
+			100deg,
+			var(--accent) 0%,
+			var(--accent-far) 50%,
+			var(--accent) 100%
+		);
+		background-size: 200% 100%;
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		animation: accel-sweep 5s linear infinite;
+	}
+}
+
+@keyframes accel-sweep {
+	from {
+		background-position: 0 0;
+	}
+	to {
+		background-position: 200% 0;
+	}
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    Catalogue tiles
    ═══════════════════════════════════════════════════════════════════════

@@ -1,5 +1,11 @@
 {
   "include": ["**/*.ts", "**/*.tsx"],
+  /* `tools/` holds one-off Bun scripts (the Keyflow preview recorder), not
+     app code. They run under `bun`, use the Bun global and top-level await,
+     and are not part of any bundle — typechecking them here would mean
+     pulling @types/bun into the app's config to satisfy a script CI never
+     builds. Biome still formats and lints them. */
+  "exclude": ["tools"],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",

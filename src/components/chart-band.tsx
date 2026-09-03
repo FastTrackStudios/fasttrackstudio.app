@@ -1,130 +1,131 @@
-import { Link } from "@tanstack/react-router";
-
-import { ProductLink } from "#/components/product-link";
+import { ChartFlow } from "#/components/chart-flow";
 import { ProjectIcon } from "#/components/project-icon";
 import type { Project } from "#/lib/projects";
 
 /**
  * Keyflow's splash, in the band directly under the stage.
  *
- * A splash, not a pitch: Keyflow already has a full landing page of its own
- * at keyflow.fasttrackstudio.app, so duplicating that argument here would
- * mean two pages to keep in step and one of them always stale. This says
- * what it is, shows a chart, and sends you there.
+ * A splash, not a second pitch. Keyflow already has a strong landing page of
+ * its own at keyflow.fasttrackstudio.app, so this brings ACROSS that page's
+ * argument — its headline, its flow triangle, its two calls to action — and
+ * sends you there, rather than inventing a competing one that would drift
+ * out of step with it.
  *
  * It is deliberately NOT a fourth stage position. The three specials are
- * instruments standing in their own light; the format is the paper they all
- * read off, so it sits on the deck below them.
+ * instruments and each owns a colour; the format is the paper they all read
+ * off, so it stands on the deck below them.
  */
 export function ChartBand({ project }: { project: Project }) {
 	return (
 		<section
 			aria-labelledby="chart-band-heading"
 			className="relative border-t border-line bg-void"
-			style={{ ["--accent" as string]: project.accent }}
+			style={{
+				["--accent" as string]: project.accent,
+				// The far stop of Keyflow's sweep — its own dark theme runs
+				// violet through blue and back. Declared here rather than in the
+				// theme block because it belongs to this band, not the site.
+				["--accent-far" as string]: "#6ea8fe",
+			}}
 		>
-			<div className="stage-w grid items-center gap-12 px-6 py-20 lg:grid-cols-[1fr_1.1fr] lg:gap-20 lg:py-24">
+			{/* The demo is capped rather than left to fill `1fr`: at full stage
+			    width the preview is ~900px tall and the band grows past a
+			    viewport, which is a lot of page for what is meant to be a
+			    signpost to another site. */}
+			<div className="stage-w mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 lg:grid-cols-[minmax(0,28rem)_minmax(0,34rem)] lg:justify-center lg:gap-16 lg:py-24">
 				<div>
-					<p className="u-label text-fg-subtle">The score everything reads</p>
-
-					<div className="mt-6 flex items-center gap-5">
-						<ProjectIcon project={project} size={64} className="rounded-xl" />
-						<div>
-							<h2
-								id="chart-band-heading"
-								className="u-display text-[clamp(2.25rem,5vw,4rem)] text-fg"
-							>
-								{project.name}
-							</h2>
-							<p className="u-label mt-2 text-[var(--accent)]">
-								{project.tagline}
-							</p>
-						</div>
+					<div className="flex items-center gap-4">
+						<ProjectIcon
+							project={project}
+							size={44}
+							className="rounded-[22%]"
+						/>
+						<p className="u-label text-fg-subtle">
+							{project.name} · the score everything reads
+						</p>
 					</div>
 
-					<p className="mt-7 max-w-lg leading-relaxed text-fg-muted">
-						{project.description}
-					</p>
+					<h2
+						id="chart-band-heading"
+						className="mt-7 text-[clamp(2.2rem,4.4vw,3.4rem)] font-semibold leading-[1.04] tracking-[-0.035em] text-balance text-fg"
+					>
+						Chart Writing,{" "}
+						{/* One word, never wrapped: the gradient is clipped to the text,
+						    and a line break inside it restarts the sweep on the second
+						    line box. */}
+						<span className="accel whitespace-nowrap">Accelerated</span>
+					</h2>
+
+					<ChartFlow className="mt-8" />
 
 					<div className="mt-9 flex flex-wrap items-center gap-3">
-						<ProductLink project={project} />
-						<Link
-							to="/projects/$slug"
-							params={{ slug: project.slug }}
-							className="u-label px-3 py-2.5 text-fg-subtle transition-colors hover:text-fg"
+						<a
+							href={`${project.site?.url}/editor`}
+							className="u-label rounded-card border border-fg/70 px-5 py-3 text-fg transition-colors duration-300 hover:bg-fg hover:text-void"
 						>
-							Details →
-						</Link>
+							Open the editor
+						</a>
+						<a
+							href={`${project.site?.url}/guide`}
+							className="u-label rounded-card border border-line-strong px-5 py-3 text-fg-muted transition-colors duration-300 hover:border-fg hover:text-fg"
+						>
+							Read the guide
+						</a>
 					</div>
+
+					<p className="u-label mt-6 text-fg-subtle">
+						Open source · No account required
+					</p>
 				</div>
 
-				<figure className="m-0 overflow-hidden rounded-card border border-line bg-bg">
-					<figcaption className="u-label flex items-center gap-3 border-b border-line px-5 py-3.5 text-fg-subtle">
-						<span aria-hidden="true" className="text-[var(--accent)]">
-							{project.glyph}
-						</span>
-						build-my-life.kf
-					</figcaption>
-					<ChartSample />
-				</figure>
+				<ChartDemo project={project} />
 			</div>
 		</section>
 	);
 }
 
 /**
- * A real chart in the format, from Keyflow's README — the header, numbered
- * sections, and the ChordPro block that layers lyrics onto them. A format is
- * best argued by showing the file.
+ * The live preview from Keyflow's own hero — the source typing itself while
+ * the engraved page re-renders beside it, keystroke by keystroke.
  *
- * Marked up by hand rather than run through a highlighter: it is one fixed
- * sample, and shipping a syntax-highlighting dependency to colour a constant
- * is a poor trade on a landing page.
+ * It is a recording, not the component. That component is Dioxus/WASM and
+ * cannot be imported into a TypeScript app, and standing up a whole WASM
+ * bundle on the apex page to draw one loop would cost far more than it is
+ * worth here. `tools/record-keyflow-preview.ts` drives the DEPLOYED page over
+ * CDP and captures exactly one chart cycle, so the loop is seamless and
+ * re-recording it is one command when the design changes.
+ *
+ * `<video>` rather than a GIF: the same eleven seconds is ~40x smaller as
+ * video, and stays sharp instead of being quantised to 256 colours. The
+ * poster is the first frame, so nothing pops in.
  */
-function ChartSample() {
+function ChartDemo({ project }: { project: Project }) {
 	return (
-		<pre className="overflow-x-auto px-5 py-6 font-mono text-[0.8rem] leading-relaxed text-fg-muted">
-			<code>
-				<span className="text-fg-subtle">--- keyflow ---{"\n"}</span>
-				<span className="text-fg">Build My Life</span>
-				<span className="text-fg-subtle"> - Housefires{"\n"}</span>
-				<span className="text-fg-subtle">72bpm 4/4 </span>
-				<span className="text-[var(--accent)]">#G{"\n\n"}</span>
-				<span className="text-[var(--accent)]">Intro: </span>
-				<span className="text-fg-subtle">| </span>
-				<span className="text-fg">1 4 </span>
-				<span className="text-fg-subtle">|{"\n\n"}</span>
-				<span className="text-[var(--accent)]">VS 1: </span>
-				<span className="text-fg-subtle">| </span>
-				<span className="text-fg">1 4 </span>
-				<span className="text-fg-subtle">| </span>
-				<span className="text-fg">5 6- </span>
-				<span className="text-fg-subtle">|{"\n\n"}</span>
-				<span className="text-[var(--accent)]">CH: </span>
-				<span className="text-fg-subtle">| </span>
-				<span className="text-fg">4 1 </span>
-				<span className="text-fg-subtle">| </span>
-				<span className="text-fg">5 6- </span>
-				<span className="text-fg-subtle">| </span>
-				<span className="text-fg">4 1 </span>
-				<span className="text-fg-subtle">| </span>
-				<span className="text-fg">5 </span>
-				<span className="text-fg-subtle">| x2{"\n\n"}</span>
-				<span className="text-fg-subtle">--- chordpro ---{"\n"}</span>
-				<span className="text-[var(--accent)]">
-					{"{sov: Verse 1 sync=lines}"}
+		<figure className="m-0 w-full overflow-hidden rounded-card border border-line bg-bg">
+			<video
+				src="/media/keyflow-preview.mp4"
+				poster="/media/keyflow-preview.jpg"
+				// A silent looping demo, so it may autoplay: `muted` and
+				// `playsInline` are both required or iOS refuses and Chrome
+				// blocks it.
+				autoPlay
+				muted
+				loop
+				playsInline
+				// It carries no information the copy beside it does not, and a
+				// screen reader announcing a video here is noise.
+				aria-hidden="true"
+				tabIndex={-1}
+				width={1000}
+				height={910}
+				className="block h-auto w-full"
+			/>
+			<figcaption className="u-label flex items-center gap-3 border-t border-line px-5 py-3.5 text-fg-subtle">
+				<span aria-hidden="true" className="text-[var(--accent)]">
+					{project.glyph}
 				</span>
-				{"\n"}
-				<span className="text-fg-subtle">[</span>
-				<span className="text-fg">G</span>
-				<span className="text-fg-subtle">]</span>
-				Worthy of every so
-				<span className="text-fg-subtle">[</span>
-				<span className="text-fg">C/G</span>
-				<span className="text-fg-subtle">]</span>
-				ng we could ever sing{"\n"}
-				<span className="text-[var(--accent)]">{"{eov}"}</span>
-			</code>
-		</pre>
+				Engraving live, on keyflow.fasttrackstudio.app
+			</figcaption>
+		</figure>
 	);
 }
