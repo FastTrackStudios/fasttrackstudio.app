@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FastTrackStudio — "on the stage"
+
+   The page is a stage seen from the house: black above, a lit deck below,
+   three instruments hung on a truss. Signal takes stage left, Ignition
+   stage right, Session stands downstage centre — in theatre the strongest
+   position on the stage, which is exactly what it is in the architecture.
+
+   ONE RULE holds the palette together: colour means product identity and
+   nothing else. Signal is green, Session blue, Ignition amber; every piece
+   of interface chrome is greyscale. Nothing borrows a product's colour to
+   decorate itself.
+
+   One file per concern, in cascade order. Tailwind inlines these at build
+   time, so `@theme` in theme.css is visible to every utility.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@import "./fonts.css";
+@import "./theme.css";
+@import "./base.css";
+@import "./stage.css";
+@import "./keyflow.css";
+@import "./motion.css";

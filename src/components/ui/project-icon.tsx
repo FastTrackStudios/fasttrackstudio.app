@@ -12,29 +12,30 @@ import type { Project } from "#/lib/projects";
  *
  * Decorative: the product name is always right next to it, so announcing the
  * icon too would just make a screen reader say the name twice.
+ *
+ * Not lazy-loaded: every one of these is in the first viewport, and a lazy
+ * image above the fold is a plate that pops in after the name.
+ *
+ * `size` is the intrinsic box, so layout never shifts. A caller may scale
+ * the rendered width with a class (`w-9 2xl:w-11`); height follows because
+ * the base styles keep images at `height: auto`.
+ *
+ * `lit` adds the plate's glow (`.plate` in styles/stage.css). A dark launcher
+ * tile on the black deck is invisible without it; on a lit surface it is not
+ * needed.
  */
 export function ProjectIcon({
 	project,
-	className = "",
 	size = 32,
+	lit = false,
+	className = "",
 }: {
 	project: Project;
-	className?: string;
 	/** Rendered box in px. Also the intrinsic size, so it never reflows. */
 	size?: number;
+	lit?: boolean;
+	className?: string;
 }) {
-	if (!project.icon) {
-		return (
-			<span
-				aria-hidden="true"
-				className={`inline-flex shrink-0 items-center justify-center font-mono ${className}`}
-				style={{ width: size, height: size, color: project.accent }}
-			>
-				{project.glyph}
-			</span>
-		);
-	}
-
 	return (
 		<img
 			src={project.icon}
@@ -44,9 +45,7 @@ export function ProjectIcon({
 			height={size}
 			// Icons are square plates with their own rounded corners baked in;
 			// the box must not letterbox them if a caller passes a stretched one.
-			className={`shrink-0 select-none object-contain ${className}`}
-			style={{ width: size, height: size }}
-			loading="lazy"
+			className={`aspect-square h-auto shrink-0 select-none rounded-[22%] object-contain ${lit ? "plate" : ""} ${className}`}
 			decoding="async"
 		/>
 	);

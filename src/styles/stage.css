@@ -1,0 +1,362 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   The stage — everything under <Scene> (components/stage/*).
+
+   The room, the truss, the beams and the pools, the hover cue, the phone
+   rig, the deck and the footlights. Nothing here is used outside the
+   scene; if a rule is, it belongs in base.css.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Every instrument reads off these, so a cue is one variable change. */
+.scene {
+	--beam-on: 0.4;
+	--beam-off: 0.07;
+
+	/* THE scale of everything on the stage. Display type is sized off the
+	   stage's width, which is right on a big monitor and cramped on a laptop
+	   or a tablet — a 13" MacBook is 1440px wide and 900px tall, and type
+	   that fills the width leaves no air above or below. So the type is
+	   multiplied by this, and it only reaches 1 on a display with room. Phones
+	   are already at the clamps' floors and are left at 1. */
+	--ui: 1;
+
+	/* THE width of the stage. The rig (beams, pools, clamps) and the content
+	   that stands under it both measure from this one value, so an instrument
+	   can never drift off the performer it is lighting — which is exactly what
+	   happens on an ultrawide display if the beams are sized in vw while the
+	   content is capped by a max-width. */
+	--stage-w: min(110rem, 100%);
+}
+
+/* Laptops and tablets: everything slightly smaller. */
+@media (min-width: 48rem) and (max-width: 95.99rem) {
+	.scene {
+		--ui: 0.85;
+	}
+}
+
+/* Ultrawide: let the stage grow rather than stranding it in the middle of a
+   5120px-wide black field, but keep a margin so it still reads as a stage in
+   a room and not as edge-to-edge wallpaper. */
+@media (min-width: 2200px) {
+	.scene {
+		--stage-w: min(180rem, 84%);
+	}
+}
+
+.stage-w {
+	width: var(--stage-w);
+	margin-inline: auto;
+	/*
+	 * Hero type sizes in `cqw` off this box, not `vw` off the window. On a
+	 * 5120px ultrawide the two are wildly different things: 6vw is 307px of
+	 * screen the stage does not occupy, so a vw-based clamp pins to its
+	 * maximum and the headline ends up looking postage-stamp small against
+	 * all that black. Measured against the stage, it scales with the thing it
+	 * actually belongs to.
+	 */
+	container-type: inline-size;
+}
+
+/* ── Truss + beams ──────────────────────────────────────────────────── */
+
+.beam {
+	position: absolute;
+	top: 0;
+	/* Percentage of its own grid cell — see RIG_GRID in stage.tsx. Narrow
+	   enough that adjacent throws barely meet: at 150% the green and amber
+	   overlapped across the middle third and mixed to olive, which is what
+	   pigment does, not light. */
+	width: 112%;
+	left: 50%;
+	transform: translateX(-50%);
+	height: 84vh;
+	max-height: 68rem;
+	/* A narrow source at the fixture widening to a broad wash on the deck —
+	   the shape a lens actually throws, not a symmetric cone. */
+	clip-path: polygon(45% 0, 55% 0, 100% 100%, 0% 100%);
+	/*
+	 * The light BUILDS DOWNWARD. A real beam is brightest at the lens, but
+	 * rendering it that way dumps saturated colour exactly where the headline
+	 * sits — the type ended up on a green triangle. Keeping the throw faint up
+	 * top and letting it gather toward the deck reads as light landing on the
+	 * performers, which is the thing worth showing anyway.
+	 */
+	background: linear-gradient(
+		to bottom,
+		color-mix(in oklab, var(--beam) 3%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 7%, transparent) 45%,
+		color-mix(in oklab, var(--beam) 17%, transparent) 80%,
+		color-mix(in oklab, var(--beam) 4%, transparent) 96%,
+		transparent 100%
+	);
+	/* Light adds; paint mixes. Screen over a black deck keeps two overlapping
+	   throws reading as two lights rather than as a muddy third colour. */
+	mix-blend-mode: screen;
+	/* Heavy blur: at this scale a clipped polygon shows its edges as hard
+	   diagonal lines, which reads as a shape rather than as light in haze. */
+	filter: blur(34px);
+	opacity: var(--beam-op, var(--beam-on));
+	transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
+	will-change: opacity;
+}
+
+/* Haze makes a beam visible in air; without a little drift it reads as a
+   painted triangle rather than light. */
+.beam::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: inherit;
+	opacity: 0.5;
+	animation: haze 14s ease-in-out infinite alternate;
+}
+
+@keyframes haze {
+	from {
+		transform: translateX(-1.2%) scaleY(0.98);
+	}
+	to {
+		transform: translateX(1.2%) scaleY(1.02);
+	}
+}
+
+/* The pool the beam lands in. */
+.pool {
+	position: absolute;
+	border-radius: 50%;
+	background: radial-gradient(
+		ellipse at center,
+		color-mix(in oklab, var(--beam) 38%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 12%, transparent) 42%,
+		transparent 70%
+	);
+	filter: blur(10px);
+	mix-blend-mode: screen;
+	opacity: var(--beam-op, var(--beam-on));
+	transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── The cue ────────────────────────────────────────────────────────────
+   Engaging one position takes the other two down, like pushing one channel
+   up on a board. It dims the LIGHT only — copy keeps its contrast at every
+   state, so nothing becomes hard to read. */
+
+.scene:has(.pos:hover) .beam,
+.scene:has(.pos:hover) .pool,
+.scene:has(.pos:focus-visible) .beam,
+.scene:has(.pos:focus-visible) .pool {
+	--beam-op: var(--beam-off);
+}
+
+.scene:has(.pos[data-id="signal"]:hover) [data-beam="signal"],
+.scene:has(.pos[data-id="signal"]:focus-visible) [data-beam="signal"],
+.scene:has(.pos[data-id="session"]:hover) [data-beam="session"],
+.scene:has(.pos[data-id="session"]:focus-visible) [data-beam="session"],
+.scene:has(.pos[data-id="ignition"]:hover) [data-beam="ignition"],
+.scene:has(.pos[data-id="ignition"]:focus-visible) [data-beam="ignition"] {
+	--beam-op: 1;
+}
+
+/* ── The position as a link ────────────────────────────────────────────
+   The whole block is the anchor to the product's site. Nothing on the deck
+   changes shape on hover — the beam is the hover state — but the icon plate
+   and the address line say "this goes somewhere" without a button. */
+
+.pos {
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* A launcher tile is a dark plate on a dark deck and disappears. The glow
+   is the plate's own ambient light, in the product's accent, and it reads
+   as the icon being lit by the beam above it rather than as a border. */
+.plate {
+	--plate-glow: color-mix(in oklab, var(--accent, #fff) 45%, transparent);
+	box-shadow:
+		0 0 0 1px #ffffff12,
+		0 10px 32px -8px var(--plate-glow);
+	transition: box-shadow 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pos:hover .plate,
+.pos:focus-visible .plate {
+	box-shadow:
+		0 0 0 1px #ffffff1f,
+		0 14px 44px -8px color-mix(in oklab, var(--accent, #fff) 70%, transparent);
+}
+
+.pos:hover .pos-arrow,
+.pos:focus-visible .pos-arrow {
+	transform: translate(0.15em, -0.15em);
+}
+
+/* ── Phones ─────────────────────────────────────────────────────────────
+   The shared rig goes dark and each product lights itself. */
+@media (max-width: 48rem) {
+	/*
+	 * The truss goes dark on a phone. Every attempt to make one shared rig
+	 * serve a stacked layout produced the same mess: a shaft long enough to
+	 * reach the third product crossed the first two, and the clip edges drew
+	 * diagonal lines through the type. Each product carries its own light
+	 * instead — see .pos-light below.
+	 */
+	.beam,
+	.pool {
+		display: none;
+	}
+
+	/*
+	 * The deck goes too. It is anchored to the bottom of the scene, and once
+	 * the products stack the scene is tall enough that the plane's top edge
+	 * landed in the MIDDLE of the last product — a horizontal band straight
+	 * through Ignition. A floor only reads as a floor when the performers are
+	 * standing on it in one frame, which is a side-by-side idea.
+	 */
+	.deck {
+		display: none;
+	}
+
+	/*
+	 * The truss and its clamps go with the beams. Left up there with nothing
+	 * hanging from them they are three small grey tabs and a hairline pinned
+	 * to the top edge — hardware for a rig that is not there.
+	 */
+	.truss {
+		display: none;
+	}
+
+	/* Booms are the room's haze. On a small dark frame they were the only
+	   thing left in the upper half and started reading as streaks. */
+	.boom {
+		opacity: 0.45;
+	}
+}
+
+/* ── One light per product (phones) ──────────────────────────────────────
+   Once the products stack, each one hangs its own spot directly overhead:
+   a narrow shaft from the top of the block, widening as it falls, landing
+   in a pool behind the icon and the name. Straight down, not from a wing —
+   a side throw on a narrow frame read as a smudge that had wandered off
+   centre, and three of them alternating read as a mistake.
+
+   Every earlier version of this drew a rectangle somewhere. The rules that
+   keep this one from doing that:
+
+   - The shaft is a CONIC gradient — the only gradient that is a cone — so
+     the shape is the light's own outline, not a clipped box.
+   - It is faded with a mask along its length, so it never reaches the
+     element's bottom edge. The cone's sides are soft because the gradient
+     stops ramp over several degrees — no `filter: blur()`, which on a
+     phone GPU is the single most expensive thing on the page.
+   - No blend mode. The mask forms a stacking context that broke `screen`
+     compositing before; over a black deck, plain alpha reads the same.
+*/
+
+.pos-light {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+}
+
+/* The shaft. Brightest where it lands, like the desktop rig — the throw
+   gathers toward the performer rather than flaring at the lens. */
+.pos-light::before {
+	content: "";
+	position: absolute;
+	top: -1.5rem;
+	left: 50%;
+	width: 150%;
+	height: 92%;
+	transform: translateX(-50%);
+	background: conic-gradient(
+		from 159deg at 50% 0%,
+		transparent 0deg,
+		color-mix(in oklab, var(--beam) 8%, transparent) 6deg,
+		color-mix(in oklab, var(--beam) 30%, transparent) 21deg,
+		color-mix(in oklab, var(--beam) 8%, transparent) 36deg,
+		transparent 42deg
+	);
+	mask-image: linear-gradient(
+		to bottom,
+		#0009 0%,
+		#000 40%,
+		#000 58%,
+		transparent 100%
+	);
+}
+
+/* The pool it lands in, behind the icon and the name. */
+.pos-light::after {
+	content: "";
+	position: absolute;
+	top: 30%;
+	left: 50%;
+	width: 88%;
+	height: 34%;
+	transform: translate(-50%, -50%);
+	background: radial-gradient(
+		ellipse at center,
+		color-mix(in oklab, var(--beam) 42%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 14%, transparent) 42%,
+		transparent 70%
+	);
+}
+
+/* ── Deck ───────────────────────────────────────────────────────────────
+   A real plane in perspective rather than a gradient pretending to be one,
+   so the plank lines converge the way floorboards do. */
+
+.deck {
+	perspective: 46vh;
+	perspective-origin: 50% 0%;
+}
+
+.deck__plane {
+	position: absolute;
+	/* Wide enough that the plane's own side edges — which converge toward the
+	   vanishing point once it is in perspective, and read as stray diagonal
+	   lines — stay off screen at every width. */
+	inset: -60% -140% 0 -140%;
+	transform: rotateX(74deg);
+	transform-origin: 50% 0%;
+	background:
+		repeating-linear-gradient(
+			to right,
+			transparent 0 7.5rem,
+			#ffffff09 7.5rem 7.55rem
+		),
+		linear-gradient(to bottom, var(--color-deck) 0%, var(--color-void) 72%);
+}
+
+/* ── Visualiser ─────────────────────────────────────────────────────────
+   Sits on the horizon, upstage of the performers, in greyscale — it is the
+   room responding, not a fourth product, so it never takes a colour. */
+
+.viz__bar {
+	width: 100%;
+	background: linear-gradient(to top, #ffffff26, #ffffff08);
+	transform-origin: 50% 100%;
+	animation: viz 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes viz {
+	from {
+		transform: scaleY(0.28);
+	}
+	to {
+		transform: scaleY(1);
+	}
+}
+
+/* ── House lights up ────────────────────────────────────────────────────
+   Page load runs as a lighting cue: the deck is there first, then the three
+   specials come up in turn. It happens once and it is quiet. */
+
+@keyframes cue-up {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: var(--beam-on);
+	}
+}

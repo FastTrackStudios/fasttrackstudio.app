@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Motion — the entrance cue and the one switch that stops everything.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Rise ───────────────────────────────────────────────────────────────
+   The page's only entrance: a short lift and fade, staggered per element.
+   Use it as a class and set the delay as a custom property — see
+   `rise()` in lib/motion.ts — rather than writing the animation inline.
+
+   `backwards` so a delayed element is invisible BEFORE its turn, not
+   sitting there at full opacity waiting to animate from nothing. */
+
+.rise {
+	animation: rise 700ms ease-out var(--rise-delay, 0ms) backwards;
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(0.75rem);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────
+   The stage is still lit; it simply stops moving. */
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+	.beam::after {
+		display: none;
+	}
+	.viz__bar {
+		transform: scaleY(0.55);
+	}
+}

@@ -5,10 +5,10 @@ app deployed to the cluster at `fasttrackstudio.app`.
 
 This repo is **only the apex landing page**. The product apps ship as their own
 repos and deploy to their own subdomains; this site links to them and never
-imports them. Each product's address lives on its catalogue record as
-`site: { url, live }` — `live: false` renders a disabled control rather than a
-link, because today only `keyflow.` actually serves an app and the rest answer
-from a wildcard with a blank page.
+imports them. There are no per-product pages here: each position on the stage
+is a link straight to that product's site. The addresses live in ONE table,
+`PRODUCT_SITES` in `src/content/products.ts`, which the catalogue, the footer and the
+legacy `/projects/…` redirects all read.
 
 ## Quick start
 
@@ -34,25 +34,50 @@ drops the `Register` declaration that types the router and `ssr`).
 
 ```
 src/
-  lib/          isomorphic — types, zod schemas, site constants
+  content/      the words and the addresses — site identity, hero copy,
+                product sites, the Contribute page. Edit these to change
+                what the site SAYS without touching how it looks.
+  lib/          isomorphic helpers — types, `pageHead()`, `rise()`, `hostOf()`
   server/       SERVER-ONLY — data sources, side effects
   fn/           server functions: the typed RPC boundary between the two
-  components/   presentational React
-  routes/       file-based routes (pages + server routes)
+  components/
+    ui/         primitives with no opinion about the page: actions (the one
+                button shape), icons, the product icon
+    layout/     the shell — header, footer, waitlist form, 404/error pages
+    stage/      the first screen: <Scene> (the room and the rig), <Marquee>,
+                <Position>, and <Stage> that assembles them
+    keyflow/    the band under the stage: <ChartBand>, its flow diagram
+                and the recorded demo
+  styles/       one CSS file per concern, imported in cascade order by
+                index.css — fonts, theme tokens, base, stage, keyflow, motion
+  routes/       file-based routes (pages + server routes). Routes are thin:
+                head, loader, and a component that composes from components/
 ```
+
+Where to go for a given change:
+
+| Change                                   | File                                   |
+| ---------------------------------------- | -------------------------------------- |
+| A product's address                      | `content/products.ts`                  |
+| A product's tagline, capabilities, colour| `server/projects.ts`                   |
+| Hero copy or its buttons                 | `content/hero.ts`                      |
+| Nav, footer links, site name/description | `content/site.ts`                      |
+| The beams, the cue, the phone spotlights | `styles/stage.css`                     |
+| Colours and fonts                        | `styles/theme.css`, `styles/fonts.css` |
+| A page's title/description/canonical     | that route's `head: () => pageHead()`  |
 
 ### The server boundary
 
 `src/server/*` starts with `import "@tanstack/react-start/server-only"`. That
 marker makes importing the module from client code a **build-time** error, not
 a runtime surprise or a silent bundle leak. Client code reaches that data
-through `src/fn/*`, where every entry point validates its input with zod before
-the handler runs:
+through `src/fn/*`, where any entry point that takes input validates it with zod
+before the handler runs (the waitlist does; the landing fetch takes none):
 
 ```ts
-export const fetchProject = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ slug: z.string().min(1).max(64) }))
-  .handler(async ({ data }) => { … });
+export const fetchLanding = createServerFn({ method: "GET" }).handler(
+  async () => ({ positions: stagePositions(), format: chartFormat() ?? null }),
+);
 ```
 
 Server *routes* (`version[.]json.ts`, `sitemap[.]xml.ts`) are handlers, never
@@ -60,7 +85,7 @@ shipped to the browser, so they import `src/server/*` directly.
 
 ### Data loading
 
-Route `loader`s call server functions, and both pages **await**. The landing
+The landing route's `loader` calls one server function and **awaits** it. The landing
 page's hero *is* the catalogue — the three products on the stage and the
 Keyflow band under them all come from the same records — so there is no part
 of the document that could usefully flush ahead of the data. Deferring it
@@ -90,9 +115,8 @@ the site stops drifting from the tags. Three rules:
 there — so the highest semver is chosen rather than the first entry.
 
 To switch it on once the tags are settled: map the exported functions in
-`src/server/projects.ts` through `withLiveVersion` again, and restore the
-`Version` row on `src/routes/projects/$slug.tsx` and the version on the
-catalogue tile.
+`src/server/projects.ts` through `withLiveVersion` again and render
+`project.version` wherever it should show.
 
 ### Product icons and the Keyflow preview
 
@@ -112,12 +136,11 @@ bun tools/record-keyflow-preview.ts /tmp/kf 0
 then crop and encode as documented at the top of that script. It captures
 exactly one chart cycle so the loop is seamless.
 
-### Search params
+### Legacy `/projects` URLs
 
-`/projects` types its URL state from a zod schema (`projectSearchSchema`), and
-`loaderDeps` narrows which params re-run the loader. Every field has a
-`.catch()`, so a stale or hand-edited URL degrades to the default view instead
-of throwing. The URL is the only source of truth — no mirrored `useState`.
+`/projects` and `/projects/<slug>` were real pages once and were in the
+sitemap. They are `beforeLoad` redirects now (301): a known slug goes to that
+product's own site, anything else goes home. They are not in the sitemap.
 
 ### SSR mode
 

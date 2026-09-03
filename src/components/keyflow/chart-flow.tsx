@@ -1,6 +1,7 @@
 /**
  * Keyflow's flow triangle, ported from its own landing page
- * (`apps/web/src/routes/home.rs` in the keyflow repo).
+ * (`apps/web/src/routes/home.rs` in the keyflow repo). Palette is bound
+ * to `--accent` / `--accent-far`, set by <ChartBand>.
  *
  * Three forms of one song, and every edge runs BOTH ways: text parses to a
  * chart and a chart exports back to text; a DAW session imports to a chart

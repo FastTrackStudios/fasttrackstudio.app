@@ -1,0 +1,61 @@
+/* ── Base ───────────────────────────────────────────────────────────── */
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	color-scheme: dark;
+	scroll-behavior: smooth;
+}
+
+html,
+body,
+#app {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	background-color: var(--color-bg);
+	color: var(--color-fg);
+	font-family: var(--font-sans);
+	font-stretch: 100%;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+::selection {
+	background-color: #ffffff28;
+}
+
+/* Chrome is greyscale, so the focus ring is a plain bright rule — it never
+   competes with a product colour for meaning. */
+:focus-visible {
+	outline: 2px solid var(--color-fg);
+	outline-offset: 3px;
+	border-radius: 1px;
+}
+
+/* ── Type roles ─────────────────────────────────────────────────────── */
+
+@layer components {
+	/* Display: condensed and heavy. Stencil on a road case. */
+	.u-display {
+		font-family: var(--font-sans);
+		font-weight: 800;
+		font-stretch: 76%;
+		text-transform: uppercase;
+		letter-spacing: -0.01em;
+		line-height: 0.9;
+	}
+
+	/* Anything that should read as machine output. */
+	.u-label {
+		font-family: var(--font-mono);
+		font-size: 0.6875rem;
+		text-transform: uppercase;
+		letter-spacing: 0.22em;
+		line-height: 1;
+	}
+}

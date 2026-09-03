@@ -1,18 +1,15 @@
 /// <reference types="vite/client" />
 
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import {
-	createRootRoute,
-	HeadContent,
-	Link,
-	Scripts,
-} from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import { SiteFooter } from "#/components/site-footer";
-import { SiteHeader } from "#/components/site-header";
-import { SITE } from "#/lib/site";
-import appCss from "#/styles.css?url";
+import { SiteFooter } from "#/components/layout/site-footer";
+import { SiteHeader } from "#/components/layout/site-header";
+import { NotFound, RootError } from "#/components/layout/status-pages";
+import { SITE } from "#/content/site";
+import { pageHead } from "#/lib/seo";
+import appCss from "#/styles/index.css?url";
 
 /**
  * Root route — owns the whole document.
@@ -21,33 +18,32 @@ import appCss from "#/styles.css?url";
  * SSR: the server streams a complete, crawlable page rather than hydrating an
  * empty div. Per-route `head()` merges into the tags below, so a child route
  * overrides the title and description without re-declaring the rest.
+ *
+ * What is here is what every page shares; what a page owns (title,
+ * description, canonical, the matching Open Graph tags) comes from
+ * `pageHead()` in that page's route.
  */
 export const Route = createRootRoute({
-	head: () => ({
-		meta: [
-			{ charSet: "utf-8" },
-			{ name: "viewport", content: "width=device-width, initial-scale=1" },
-			{ title: `${SITE.name} — ${SITE.tagline}` },
-			{ name: "description", content: SITE.description },
-			{ name: "theme-color", content: SITE.themeColor },
-
-			{ property: "og:type", content: "website" },
-			{ property: "og:site_name", content: SITE.name },
-			{ property: "og:locale", content: SITE.locale },
-			{ property: "og:title", content: `${SITE.name} — ${SITE.tagline}` },
-			{ property: "og:description", content: SITE.description },
-			{ property: "og:url", content: SITE.url },
-
-			{ name: "twitter:card", content: "summary_large_image" },
-			{ name: "twitter:title", content: `${SITE.name} — ${SITE.tagline}` },
-			{ name: "twitter:description", content: SITE.description },
-		],
-		links: [
-			{ rel: "stylesheet", href: appCss },
-			{ rel: "icon", href: "/favicon.ico" },
-			{ rel: "canonical", href: SITE.url },
-		],
-	}),
+	head: () => {
+		const home = pageHead();
+		return {
+			meta: [
+				{ charSet: "utf-8" },
+				{ name: "viewport", content: "width=device-width, initial-scale=1" },
+				{ name: "theme-color", content: SITE.themeColor },
+				{ property: "og:type", content: "website" },
+				{ property: "og:site_name", content: SITE.name },
+				{ property: "og:locale", content: SITE.locale },
+				{ name: "twitter:card", content: "summary_large_image" },
+				// Defaults, so a page that forgets `pageHead()` is still titled.
+				...home.meta,
+			],
+			links: [
+				{ rel: "stylesheet", href: appCss },
+				{ rel: "icon", href: "/favicon.ico" },
+			],
+		};
+	},
 	notFoundComponent: NotFound,
 	errorComponent: RootError,
 	shellComponent: RootDocument,
@@ -79,36 +75,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<Scripts />
 			</body>
 		</html>
-	);
-}
-
-function NotFound() {
-	return (
-		<section className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-6 py-32">
-			<p className="u-label text-fg-subtle">404</p>
-			<h1 className="u-display text-[clamp(2.25rem,5vw,3.5rem)]">
-				That page does not exist.
-			</h1>
-			<Link
-				to="/"
-				className="u-label text-fg underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-fg"
-			>
-				Back home
-			</Link>
-		</section>
-	);
-}
-
-function RootError({ error }: { error: Error }) {
-	return (
-		<section className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-6 py-32">
-			<p className="u-label text-fg-subtle">Error</p>
-			<h1 className="u-display text-[clamp(2.25rem,5vw,3.5rem)]">
-				Something went wrong.
-			</h1>
-			<pre className="max-w-full overflow-x-auto rounded-card border border-line bg-surface p-4 font-mono text-xs text-fg-muted">
-				{error.message}
-			</pre>
-		</section>
 	);
 }

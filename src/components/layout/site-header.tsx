@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
-import { GitHubIcon } from "#/components/platform-support";
-import { NAV_LINKS, SITE, SOCIAL_LINKS } from "#/lib/site";
+import { Icon } from "#/components/ui/icons";
+import { NAV_LINKS, SITE, SOCIAL_LINKS } from "#/content/site";
 
 /**
  * Floats over the stage — no background and no rule, or the truss stops
@@ -16,42 +16,15 @@ export function SiteHeader() {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const panelRef = useRef<HTMLDivElement>(null);
 
-	// Escape closes, and focus goes back to the control that opened it —
-	// otherwise focus is left orphaned at the top of the document.
-	useEffect(() => {
-		if (!open) return;
-
-		function onKeyDown(event: KeyboardEvent) {
-			if (event.key === "Escape") {
-				setOpen(false);
-				buttonRef.current?.focus();
-			}
-		}
-
-		function onPointerDown(event: PointerEvent) {
-			const target = event.target as Node;
-			if (
-				!panelRef.current?.contains(target) &&
-				!buttonRef.current?.contains(target)
-			) {
-				setOpen(false);
-			}
-		}
-
-		document.addEventListener("keydown", onKeyDown);
-		document.addEventListener("pointerdown", onPointerDown);
-
-		// The drawer covers the page; letting the page scroll behind it means
-		// closing it drops you somewhere you did not choose.
-		const previousOverflow = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-
-		return () => {
-			document.removeEventListener("keydown", onKeyDown);
-			document.removeEventListener("pointerdown", onPointerDown);
-			document.body.style.overflow = previousOverflow;
-		};
-	}, [open]);
+	useDrawer(open, {
+		close: () => setOpen(false),
+		isInside: (target) =>
+			Boolean(
+				panelRef.current?.contains(target) ||
+					buttonRef.current?.contains(target),
+			),
+		restoreFocus: () => buttonRef.current?.focus(),
+	});
 
 	return (
 		<header className="absolute inset-x-0 top-0 z-50">
@@ -92,7 +65,7 @@ export function SiteHeader() {
 								rel="noreferrer noopener"
 								className="block text-fg-muted transition-colors hover:text-fg"
 							>
-								<GitHubIcon className="h-5 w-5" />
+								<Icon name="github" label={link.label} className="h-5 w-5" />
 							</a>
 						</li>
 					))}
@@ -152,7 +125,11 @@ export function SiteHeader() {
 										onClick={() => setOpen(false)}
 										className="flex items-center gap-3 text-fg-muted transition-colors hover:text-fg"
 									>
-										<GitHubIcon className="h-4 w-4" />
+										<Icon
+											name="github"
+											label={link.label}
+											className="h-4 w-4"
+										/>
 										{link.label}
 									</a>
 								</li>
@@ -163,6 +140,48 @@ export function SiteHeader() {
 			) : null}
 		</header>
 	);
+}
+
+/**
+ * What an open drawer owes the page: Escape closes it and returns focus to
+ * the control that opened it (otherwise focus is left orphaned at the top
+ * of the document); a press outside closes it; and the page does not scroll
+ * behind it, or closing it drops you somewhere you did not choose.
+ */
+function useDrawer(
+	open: boolean,
+	handlers: {
+		close: () => void;
+		isInside: (target: Node) => boolean;
+		restoreFocus: () => void;
+	},
+) {
+	useEffect(() => {
+		if (!open) return;
+
+		function onKeyDown(event: KeyboardEvent) {
+			if (event.key === "Escape") {
+				handlers.close();
+				handlers.restoreFocus();
+			}
+		}
+
+		function onPointerDown(event: PointerEvent) {
+			if (!handlers.isInside(event.target as Node)) handlers.close();
+		}
+
+		document.addEventListener("keydown", onKeyDown);
+		document.addEventListener("pointerdown", onPointerDown);
+
+		const previousOverflow = document.body.style.overflow;
+		document.body.style.overflow = "hidden";
+
+		return () => {
+			document.removeEventListener("keydown", onKeyDown);
+			document.removeEventListener("pointerdown", onPointerDown);
+			document.body.style.overflow = previousOverflow;
+		};
+	}, [open, handlers.close, handlers.isInside, handlers.restoreFocus]);
 }
 
 /** Three rules that become a cross. */

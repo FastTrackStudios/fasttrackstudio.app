@@ -1,5 +1,5 @@
 /**
- * Project catalogue — the SERVER side of the boundary.
+ * Product catalogue — the SERVER side of the boundary.
  *
  * The marker import below makes this module server-only: importing it from
  * client code is a build-time violation, not a runtime surprise. Reach it
@@ -12,45 +12,40 @@
 
 import "@tanstack/react-start/server-only";
 
-import type { Project, ProjectSearch } from "#/lib/projects";
+import { PRODUCT_SITES } from "#/content/products";
+import type { Project } from "#/lib/projects";
 
 // NOT WIRED IN. `withLiveVersion` reads each repo's published version from
 // GitHub and is ready to use, but the tags across these repos are wrong right
 // now and are being renumbered, so the site would be reporting numbers that
 // are about to change. Versions are therefore not displayed at all for the
 // moment — see the note in src/server/releases.ts. Re-enable by mapping the
-// exported functions below through it again and restoring the `Version` row
-// on the project page.
+// exported functions below through it again.
 // import { withLiveVersion } from "#/server/releases";
 
 /**
- * Catalogue order is deliberate: the three products that define the system
- * come first — Signal (audio), Ignition (visual), Session (the coordinator
- * that drives both) — then the layers underneath them.
- *
  * Signal, Session and Ignition are the products — the audio side, the
- * coordinator, and the visual side. They are what the front page is, in that
- * left-to-right order, so `stagePositions()` below returns them explicitly
- * rather than by slicing this list.
+ * coordinator, and the visual side. They are what the front page is, so
+ * `stagePositions()` below returns them explicitly, in stage order, rather
+ * than by slicing this list.
  *
  * Keyflow is here but is NOT a stage position: it is the chart format the
  * three products read, so it gets its own band under the stage rather than a
  * fourth special.
  *
  * Accents are taken from each product's shipped app icon (the ambient light
- * in `apps/<product>/ios/icon.svg` in its own repo), so the icon and the light on the
- * name beside it are the same colour. Keyflow is the exception: its icon is
- * pink but the product reads violet, so the site uses violet and the icon
- * keeps its own ambient.
+ * in `apps/<product>/ios/icon.svg` in its own repo), so the icon and the light
+ * on the name beside it are the same colour. Keyflow is the exception: its
+ * icon is pink but the product reads violet, so the site uses violet and the
+ * icon keeps its own ambient.
  *
- * The DAW layer and the plugin suite are deliberately NOT here: they are
- * substrate inside those three, not things anyone obtains separately, and
- * listing them made the toolkit look like seven half-products instead of
- * three whole ones.
+ * The DAW layer, the input layer and the plugin suite are deliberately NOT
+ * here: they are substrate inside those products, not things anyone obtains
+ * separately, and listing them made the toolkit look like seven
+ * half-products instead of three whole ones.
  *
  * Every repo link points at GitHub — the pre-split Codeberg URLs the old site
- * used are 404 now. Input is not a standalone repo and links to `daw`, which
- * absorbed it. Verify a link resolves before changing it.
+ * used are 404 now. Verify a link resolves before changing it.
  */
 const PROJECTS: readonly Project[] = [
 	{
@@ -62,14 +57,12 @@ const PROJECTS: readonly Project[] = [
 		glyph: "→→",
 		icon: "/icons/session.svg",
 		accent: "#2e9bff",
-		background: "#08101a",
 		capabilities: [
 			{ label: "Playback" },
 			{ label: "Lyric and cue sync" },
 			{ label: "Automatic charts" },
 		],
-		site: { url: "https://session.fasttrackstudio.app", live: false },
-		status: "alpha",
+		site: PRODUCT_SITES.session,
 		version: "0.0.1",
 		repo: "https://github.com/FastTrackStudios/session",
 	},
@@ -82,7 +75,6 @@ const PROJECTS: readonly Project[] = [
 		glyph: "≋",
 		icon: "/icons/signal.svg",
 		accent: "#2fd673",
-		background: "#08140f",
 		capabilities: [
 			{ label: "Audio sampler" },
 			{ label: "Synthesizer" },
@@ -91,8 +83,7 @@ const PROJECTS: readonly Project[] = [
 				tags: ["Guitar", "Keys", "Drums", "Bass", "more"],
 			},
 		],
-		site: { url: "https://signal.fasttrackstudio.app", live: false },
-		status: "alpha",
+		site: PRODUCT_SITES.signal,
 		version: "0.0.1",
 		repo: "https://github.com/FastTrackStudios/signal",
 	},
@@ -105,14 +96,12 @@ const PROJECTS: readonly Project[] = [
 		glyph: "✦",
 		icon: "/icons/ignition.svg",
 		accent: "#ff8a2b",
-		background: "#150d05",
 		capabilities: [
 			{ label: "Lighting board" },
 			{ label: "Projection mapping" },
 			{ label: "Live video processing" },
 		],
-		site: { url: "https://ignition.fasttrackstudio.app", live: false },
-		status: "alpha",
+		site: PRODUCT_SITES.ignition,
 		version: "0.0.1",
 		repo: "https://github.com/FastTrackStudios/Ignition",
 	},
@@ -125,7 +114,6 @@ const PROJECTS: readonly Project[] = [
 		glyph: ".kf",
 		icon: "/icons/keyflow.svg",
 		accent: "#a78bfa",
-		background: "#0d0a14",
 		capabilities: [
 			{ label: "Plain-text charts" },
 			{ label: "Lyrics and sections" },
@@ -134,28 +122,9 @@ const PROJECTS: readonly Project[] = [
 				tags: ["MIDI", "MusicXML", "ChordPro", "Finale"],
 			},
 		],
-		site: { url: "https://keyflow.fasttrackstudio.app", live: true },
-		status: "alpha",
+		site: PRODUCT_SITES.keyflow,
 		version: "0.0.1",
 		repo: "https://github.com/FastTrackStudios/keyflow",
-	},
-	{
-		slug: "input",
-		name: "Input",
-		tagline: "Wiring closet",
-		description:
-			"MIDI, keys, hardware controllers — into the action system. Part of the DAW substrate.",
-		glyph: "I/O",
-		accent: "#a1a1aa",
-		background: "#0f0f12",
-		capabilities: [
-			{ label: "MIDI and controllers" },
-			{ label: "Key bindings" },
-			{ label: "Action routing" },
-		],
-		status: "alpha",
-		version: "0.0.1",
-		repo: "https://github.com/FastTrackStudios/daw",
 	},
 ];
 
@@ -179,31 +148,7 @@ export function chartFormat(): Project | undefined {
 	return PROJECTS.find((project) => project.slug === "keyflow");
 }
 
-/** Every project, in catalogue order. */
+/** Every product, in catalogue order. */
 export function listProjects(): readonly Project[] {
 	return PROJECTS;
-}
-
-/** Filtered + sorted view backing the `/projects` index. */
-export function queryProjects(search: ProjectSearch): Project[] {
-	const needle = search.q?.toLowerCase() ?? "";
-
-	const matched = PROJECTS.filter((project) => {
-		if (search.status && project.status !== search.status) return false;
-		if (!needle) return true;
-		return `${project.name} ${project.tagline} ${project.description}`
-			.toLowerCase()
-			.includes(needle);
-	});
-
-	return [...matched].sort((a, b) =>
-		(search.sort ?? "name") === "status"
-			? a.status.localeCompare(b.status) || a.name.localeCompare(b.name)
-			: a.name.localeCompare(b.name),
-	);
-}
-
-/** One project, or `undefined` when the slug does not exist. */
-export function findProject(slug: string): Project | undefined {
-	return PROJECTS.find((project) => project.slug === slug);
 }
