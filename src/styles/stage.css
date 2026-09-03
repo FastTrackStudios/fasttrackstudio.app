@@ -232,73 +232,92 @@
 }
 
 /* ── One light per product (phones) ──────────────────────────────────────
-   Once the products stack, each one hangs its own spot directly overhead:
-   a narrow shaft from the top of the block, widening as it falls, landing
-   in a pool behind the icon and the name. Straight down, not from a wing —
-   a side throw on a narrow frame read as a smudge that had wandered off
-   centre, and three of them alternating read as a mistake.
+   Once the products stack, each one is lit by a single spot thrown in from
+   a wing — Signal from stage left, Session from stage right, Ignition from
+   stage left — the way a follow-spot actually hits a performer: a shaft
+   coming in low from the side, landing in a wide ellipse behind the name.
+   `--side` (-1 left, 1 right) is set by <Position>.
 
-   Every earlier version of this drew a rectangle somewhere. The rules that
-   keep this one from doing that:
+   The shaft and the pool are ONE light. The shaft is a conic gradient whose
+   apex sits just outside the block at the wing and whose spread is chosen
+   so that, by the time it reaches the name, its width matches the pool's
+   height; it is faded along its length so it dies inside the pool rather
+   than crossing out the far side. The pool is the footprint of that shaft
+   on the deck — a shallow beam from the side lands as a wide, low ellipse —
+   so the two shapes share a colour, an axis and an edge.
 
-   - The shaft is a CONIC gradient — the only gradient that is a cone — so
-     the shape is the light's own outline, not a clipped box.
-   - It is faded with a mask along its length, so it never reaches the
-     element's bottom edge. The cone's sides are soft because the gradient
-     stops ramp over several degrees — no `filter: blur()`, which on a
-     phone GPU is the single most expensive thing on the page.
-   - No blend mode. The mask forms a stacking context that broke `screen`
-     compositing before; over a black deck, plain alpha reads the same.
-*/
+   No `filter: blur()`: the gradients ramp over several degrees and are soft
+   on their own, and blur is the single most expensive thing on a phone GPU.
+   No blend mode either: over a black deck, plain alpha reads the same. */
 
 .pos-light {
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
 	z-index: 0;
+	/* Where the beam lands: the icon + name row. */
+	--land-x: 50%;
+	--land-y: 30%;
 }
 
-/* The shaft. Brightest where it lands, like the desktop rig — the throw
-   gathers toward the performer rather than flaring at the lens. */
+/* The shaft.
+   A long box CENTRED on the landing point and rotated about it, so the beam
+   passes through the pool whatever the block's proportions — no aiming by
+   angle across an unknown aspect ratio. Inside the box the light is a cone
+   from the source end (the wing) widening toward the middle (the landing);
+   the mask fades it out just past the middle so it ends inside the pool.
+
+   The spread (±10° soft to ±14°) is chosen so the cone is about the pool's
+   height wide when it arrives. The rotation lifts the source end: 14° from
+   stage left (`--side: -1`), 166° from stage right (`--side: 1`) — the same
+   tilt, mirrored, and the source is always the box's left end before the
+   rotation, which is what the mask direction relies on. */
 .pos-light::before {
 	content: "";
 	position: absolute;
-	top: -1.5rem;
-	left: 50%;
-	width: 150%;
-	height: 92%;
-	transform: translateX(-50%);
+	top: var(--land-y);
+	left: var(--land-x);
+	width: 240%;
+	/* Tall enough that the cone never meets the box's long edges — past the
+	   landing it is wider than the pool, and a box edge there shows as a
+	   hard line along the beam. */
+	height: 120%;
+	transform: translate(-50%, -50%) rotate(calc(90deg + var(--side, -1) * 76deg));
 	background: conic-gradient(
-		from 159deg at 50% 0%,
-		transparent 0deg,
-		color-mix(in oklab, var(--beam) 8%, transparent) 6deg,
-		color-mix(in oklab, var(--beam) 30%, transparent) 21deg,
-		color-mix(in oklab, var(--beam) 8%, transparent) 36deg,
-		transparent 42deg
+		from 90deg at 0% 50%,
+		transparent -20deg,
+		color-mix(in oklab, var(--beam) 4%, transparent) -14deg,
+		color-mix(in oklab, var(--beam) 16%, transparent) -6deg,
+		color-mix(in oklab, var(--beam) 24%, transparent) 0deg,
+		color-mix(in oklab, var(--beam) 16%, transparent) 6deg,
+		color-mix(in oklab, var(--beam) 4%, transparent) 14deg,
+		transparent 20deg
 	);
 	mask-image: linear-gradient(
-		to bottom,
-		#0009 0%,
-		#000 40%,
-		#000 58%,
-		transparent 100%
+		to right,
+		#0000 0%,
+		#000c 12%,
+		#000 42%,
+		#0009 52%,
+		transparent 61%
 	);
 }
 
-/* The pool it lands in, behind the icon and the name. */
+/* The pool: the shaft's footprint. Wide and low, centred on the landing
+   point, brightest where the shaft arrives. */
 .pos-light::after {
 	content: "";
 	position: absolute;
-	top: 30%;
-	left: 50%;
-	width: 88%;
+	top: var(--land-y);
+	left: var(--land-x);
+	width: 110%;
 	height: 34%;
 	transform: translate(-50%, -50%);
 	background: radial-gradient(
-		ellipse at center,
-		color-mix(in oklab, var(--beam) 42%, transparent) 0%,
-		color-mix(in oklab, var(--beam) 14%, transparent) 42%,
-		transparent 70%
+		ellipse at calc(50% + var(--side, -1) * -12%) 50%,
+		color-mix(in oklab, var(--beam) 30%, transparent) 0%,
+		color-mix(in oklab, var(--beam) 12%, transparent) 40%,
+		transparent 72%
 	);
 }
 

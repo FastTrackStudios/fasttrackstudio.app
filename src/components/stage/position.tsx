@@ -21,9 +21,12 @@ import type { Capability, Project } from "#/lib/projects";
 export function Position({
 	project,
 	centre = false,
+	side = -1,
 }: {
 	project: Project;
 	centre?: boolean;
+	/** Phones only: -1 lights this product from stage left, 1 from right. */
+	side?: -1 | 1;
 }) {
 	return (
 		<a
@@ -43,14 +46,15 @@ export function Position({
 				"--accent": project.accent,
 			}}
 		>
-			{/* Phone-only light: once the products stack, each one hangs its
-			    own spot overhead — see "One light per product" in stage.css. */}
+			{/* Phone-only light: once the products stack, each one is lit from
+			    a wing — see "One light per product" in stage.css. */}
 			<span
 				aria-hidden="true"
 				className="pos-light md:hidden"
 				style={{
-					// @ts-expect-error -- custom property
+					// @ts-expect-error -- custom properties
 					"--beam": project.accent,
+					"--side": side,
 				}}
 			/>
 

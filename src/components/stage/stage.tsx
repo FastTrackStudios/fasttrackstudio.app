@@ -33,11 +33,13 @@ export function Stage({
 				  beams throw — lit stage, dark performers.
 				*/}
 				<div className="mt-auto grid grid-cols-1 gap-6 pt-10 md:grid-cols-3 md:gap-6 2xl:pt-16">
-					{positions.map((project) => (
+					{positions.map((project, i) => (
 						<Position
 							key={project.slug}
 							project={project}
 							centre={project.slug === centre}
+							// Alternating wings once they stack: left, right, left.
+							side={i % 2 === 0 ? -1 : 1}
 						/>
 					))}
 				</div>
