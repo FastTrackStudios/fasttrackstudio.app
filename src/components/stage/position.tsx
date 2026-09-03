@@ -1,3 +1,4 @@
+import { Spotlight } from "#/components/stage/spotlight";
 import { ProjectIcon } from "#/components/ui/project-icon";
 import { rise } from "#/lib/motion";
 import type { Capability, Project } from "#/lib/projects";
@@ -46,16 +47,13 @@ export function Position({
 				"--accent": project.accent,
 			}}
 		>
-			{/* Phone-only light: once the products stack, each one is lit from
-			    a wing — see "One light per product" in stage.css. */}
-			<span
-				aria-hidden="true"
-				className="pos-light md:hidden"
-				style={{
-					// @ts-expect-error -- custom properties
-					"--beam": project.accent,
-					"--side": side,
-				}}
+			{/* Phone-only: the follow-spot from the wing. Sits at the top of the
+			    block so its pool lands on the icon + name row. */}
+			<Spotlight
+				id={project.slug}
+				color={project.accent}
+				side={side}
+				className="md:hidden"
 			/>
 
 			<span className="relative flex flex-1 flex-col">
