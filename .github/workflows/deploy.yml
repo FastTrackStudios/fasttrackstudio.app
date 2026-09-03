@@ -35,10 +35,11 @@ env:
   # Newer skopeo rejects the host's v1 registries.conf; we name the registry
   # explicitly everywhere, so use an empty (valid) config.
   CONTAINERS_REGISTRIES_CONF: /dev/null
-  # Polled by Verify live. The starcommand host rides the existing wildcard,
-  # so it works before external DNS for the apex is cut over. Point this at
-  # https://fasttrackstudio.app once the apex resolves to the cluster edge.
-  VERIFY_URL: https://fts-www.starcommand.live
+  # Polled by Verify live. The apex now resolves to the cluster edge and the
+  # Argo Application serves this chart there (see the cutover note in
+  # ~/.starcommand/modules/services/fasttrackstudio-site), so this polls the
+  # real address rather than the LAN wildcard the scaffold used.
+  VERIFY_URL: https://fasttrackstudio.app
 
 jobs:
   deploy:
