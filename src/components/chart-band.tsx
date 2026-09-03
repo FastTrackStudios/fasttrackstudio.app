@@ -28,11 +28,18 @@ export function ChartBand({ project }: { project: Project }) {
 				["--accent-far" as string]: "#6ea8fe",
 			}}
 		>
-			{/* The demo is capped rather than left to fill `1fr`: at full stage
-			    width the preview is ~900px tall and the band grows past a
-			    viewport, which is a lot of page for what is meant to be a
-			    signpost to another site. */}
-			<div className="stage-w mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 lg:grid-cols-[minmax(0,28rem)_minmax(0,34rem)] lg:justify-center lg:gap-16 lg:py-24">
+			{/*
+			  Measured with `max-w-6xl`, NOT the `stage-w` utility. `--stage-w`
+			  is declared on `.scene`, and this band deliberately sits outside
+			  it — so `stage-w` here resolves to nothing but a stray
+			  `container-type`, and the band should read narrower than the stage
+			  in any case: it is a signpost, not a fourth position.
+
+			  The demo column is capped rather than left to fill `1fr`, because
+			  at full width the preview is ~900px tall and the band grows past a
+			  viewport.
+			*/}
+			<div className="mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 lg:grid-cols-[minmax(0,28rem)_minmax(0,34rem)] lg:justify-center lg:gap-16 lg:py-24">
 				<div>
 					<div className="flex items-center gap-4">
 						<ProjectIcon

@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SITE } from "#/lib/site";
+import { NAV_LINKS, SITE } from "#/lib/site";
 import { listProjects } from "#/server/projects";
 
 /**
- * Generated from the same catalogue the pages render, so adding a project
- * cannot leave the sitemap stale. Server route — the handler never ships to
- * the browser, which is why importing the server-only module here is fine.
+ * Generated from the same catalogue and the same nav the pages render, so
+ * neither adding a project nor adding a top-level page can leave the sitemap
+ * stale. (`/contribute` was missing precisely because the static list was
+ * written out by hand.)
+ *
+ * Server route — the handler never ships to the browser, which is why
+ * importing the server-only module here is fine.
  */
 export const Route = createFileRoute("/sitemap.xml")({
 	server: {
@@ -13,7 +17,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 			GET: () => {
 				const paths = [
 					"/",
-					"/projects",
+					...NAV_LINKS.map((link) => link.to),
 					...listProjects().map((project) => `/projects/${project.slug}`),
 				];
 
