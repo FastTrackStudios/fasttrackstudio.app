@@ -208,6 +208,14 @@ helm template test deploy/chart/fts-www
 
 ### Cutover
 
+**Selector change, 2026-09-03.** The `fts-www` chart labels its pods
+`app.kubernetes.io/name: fts-www`; the old chart used `fts-site`. A
+Deployment's selector is immutable, so Argo could not patch the existing
+Deployment across the swap and the first sync failed. The fix was a one-time
+`kubectl delete deployment -n fasttrackstudio-site fasttrackstudio-site`,
+after which the next sync created it fresh. Argo does not retry a revision
+whose sync failed, so a new commit was needed to trigger that sync.
+
 Done, 2026-09-03. `fasttrackstudio.app` used to serve the Dioxus app from
 the FastTrackStudio monorepo (chart `apps/site/deploy/chart/fts-site`,
 image `fts-site`). That app was split out of the monorepo and deleted from
