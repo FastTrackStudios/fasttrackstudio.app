@@ -6,11 +6,9 @@
 # on every main push; argocd-image-updater (digest strategy on :latest)
 # rolls the Deployment.
 #
-# NOTE: the Dioxus app in the FastTrackStudio monorepo (chart `fts-site`)
-# currently claims `fasttrackstudio.app` in ITS ingress. Two Ingresses on
-# one host is undefined behaviour — drop the apex host from fts-site's
-# values.yaml (leaving it on its own subdomain) in the same change that
-# first deploys this chart.
+# This chart owns `fasttrackstudio.app` as of the 2026-09-03 cutover; the
+# monorepo's `fts-site` no longer serves it (that app was split out of the
+# monorepo and deleted). See the Cutover section in README.md.
 
 image:
   registry: registry.starcommand.live:30050
@@ -50,9 +48,11 @@ ingress:
   enabled: true
   className: ""
   annotations: {}
-  # Every host serves the same app. fasttrackstudio.app needs external DNS
-  # pointed at the cluster edge; the starcommand.live host rides the existing
-  # wildcard and is what CI's verify-live can poll from the LAN.
+  # Every host serves the same app. The Argo Application overrides this list
+  # with just the apex and www (see the starcommand module), which is also
+  # what CI's verify-live polls; the starcommand.live host is kept here as
+  # the chart default so `helm template` alone still renders something
+  # reachable on the LAN.
   hosts:
     - fasttrackstudio.app
     - www.fasttrackstudio.app

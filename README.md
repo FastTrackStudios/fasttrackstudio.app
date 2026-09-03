@@ -4,9 +4,11 @@ The FastTrackStudio marketing landing page — a TanStack Start (React 19, SSR)
 app deployed to the cluster at `fasttrackstudio.app`.
 
 This repo is **only the apex landing page**. The product apps ship as their own
-repos and deploy to their own subdomains (`keyflow.`, `guides.`, `input.`, …);
-this site links to them and never imports them. Their addresses live in
-`SUBDOMAINS` in `src/lib/site.ts`.
+repos and deploy to their own subdomains; this site links to them and never
+imports them. Each product's address lives on its catalogue record as
+`site: { url, live }` — `live: false` renders a disabled control rather than a
+link, because today only `keyflow.` actually serves an app and the rest answer
+from a wildcard with a blank page.
 
 ## Quick start
 
@@ -58,13 +60,48 @@ shipped to the browser, so they import `src/server/*` directly.
 
 ### Data loading
 
-Route `loader`s call server functions. Two shapes are in use, deliberately:
+Route `loader`s call server functions, and both pages **await**. The landing
+page's hero *is* the catalogue — the three products on the stage and the
+Keyflow band under them all come from the same records — so there is no part
+of the document that could usefully flush ahead of the data. Deferring it
+would add a suspense boundary that never pays for itself.
 
-- **Awaited** (`/projects`) — the list *is* the page; render it with the
-  document.
-- **Deferred** (`/`) — the loader returns the promise unawaited and the
-  component renders it inside `<Suspense><Await>`. The hero flushes to the
-  browser immediately and the grid **streams** in behind it.
+The one thing that must never block a render is GitHub; see below.
+
+### Live versions
+
+`src/server/releases.ts` replaces each project's hand-written `version` with
+what its repo actually published (latest release, else highest semver tag), so
+the site stops drifting from the tags. Three rules:
+
+1. **A render never waits on GitHub.** It reads a process-local cache and
+   returns immediately — hit, miss or stale — and schedules a refresh in the
+   background.
+2. **Failure is invisible.** Any error leaves the last good answer in place,
+   or falls back to the catalogue's static version. Nothing throws.
+3. **The rate limit is respected.** 60 requests/hour unauthenticated; a
+   30-minute TTL over five repos is ~20/hour. `GITHUB_TOKEN` raises it.
+
+`/tags` is ordered by ref name, not version — `v0.10.0` sorts *below* `v0.9.0`
+there — so the highest semver is chosen rather than the first entry.
+
+### Product icons and the Keyflow preview
+
+`public/icons/*.svg` are each product's real launcher icon, copied from its own
+repo (`apps/<product>/ios/icon.svg`). They are snapshots: re-copy them when an
+upstream icon changes. Product accent colours are taken **from** those icons,
+so a name and its icon are always lit the same hue.
+
+`public/media/keyflow-preview.mp4` is a recording of the live chart preview on
+keyflow.fasttrackstudio.app — that component is Dioxus/WASM and cannot be
+imported here. Re-record it with:
+
+```bash
+bun tools/record-keyflow-preview.ts /tmp/kf 0
+```
+
+then crop and encode as documented at the top of that script. It captures
+exactly one chart cycle so the loop is seamless.
 
 ### Search params
 
@@ -137,13 +174,22 @@ The Helm chart is `deploy/chart/fts-www`. Render it locally with:
 helm template test deploy/chart/fts-www
 ```
 
-### Cutover note
+### Cutover
 
-The Dioxus app in the FastTrackStudio monorepo (chart `fts-site`) currently
-claims `fasttrackstudio.app` in its own ingress. Two Ingresses on one host is
-undefined behaviour — remove the apex host from `apps/site/deploy/chart/fts-site/values.yaml`
-(leaving that app on its own subdomain) in the same change that first deploys
-this chart.
+Done, 2026-09-03. `fasttrackstudio.app` used to serve the Dioxus app from
+the FastTrackStudio monorepo (chart `apps/site/deploy/chart/fts-site`,
+image `fts-site`). That app was split out of the monorepo and deleted from
+it, so the Argo source was dangling and only the last-pulled image was
+still running.
+
+The Argo Application in
+`~/.starcommand/modules/services/fasttrackstudio-site/` now tracks THIS
+repo and `deploy/chart/fts-www`. Its name, namespace and Service name were
+kept identical across the swap, so the Caddy route and the external DNS
+record carried over with no window where the apex resolved to nothing.
+
+The Dioxus app's source is recoverable from the monorepo at `d3980e4dd^`
+if any of it is ever wanted again.
 
 ### Waitlist
 
