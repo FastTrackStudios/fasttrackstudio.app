@@ -28,8 +28,13 @@ export function HeroActions({ className = "" }: { className?: string }) {
 				// anchor. A button that 404s is worse than one that says wait.
 				if (action.kind === "soon") {
 					return (
-						<span
+						<button
 							key={action.label}
+							type="button"
+							// `aria-disabled` rather than `disabled`: a disabled button
+							// drops out of the tab order entirely, so a keyboard user
+							// never learns the action exists. This one is reachable and
+							// announced as unavailable, and does nothing when pressed.
 							aria-disabled="true"
 							// Without an explicit label the two spans concatenate to
 							// "Forumsoon" for a screen reader.
@@ -40,7 +45,7 @@ export function HeroActions({ className = "" }: { className?: string }) {
 							<span aria-hidden="true" className="text-[0.625rem] opacity-70">
 								soon
 							</span>
-						</span>
+						</button>
 					);
 				}
 

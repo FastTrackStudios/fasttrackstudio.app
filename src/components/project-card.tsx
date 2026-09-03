@@ -1,11 +1,16 @@
 import { Link } from "@tanstack/react-router";
 
+import { ProjectIcon } from "#/components/project-icon";
+import { ProjectMotif } from "#/components/project-motif";
 import type { Project } from "#/lib/projects";
 
 /**
- * One project tile. Placeholder styling on purpose — the accent and
- * background come from the project record, so a redesign can lean on
- * per-project color without touching the data.
+ * One catalogue tile.
+ *
+ * The tile is a stage in miniature: its own dark, its own colour, and a
+ * looping motif of the thing it is running behind the type. The motif is
+ * painted first and the content sits above it on `z-10`, so the picture is
+ * lit from behind the words rather than competing with them.
  */
 export function ProjectCard({ project }: { project: Project }) {
 	return (
@@ -14,27 +19,27 @@ export function ProjectCard({ project }: { project: Project }) {
 			params={{ slug: project.slug }}
 			style={{
 				backgroundColor: project.background,
-				borderColor: "var(--color-line)",
+				["--accent" as string]: project.accent,
 			}}
-			className="group relative flex min-h-56 flex-col overflow-hidden rounded-card border p-7 transition-all duration-300 hover:-translate-y-0.5"
+			className="group relative flex min-h-72 flex-col overflow-hidden rounded-card border border-line p-7 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)]"
 		>
-			<div className="mb-8 flex items-start justify-between">
-				<span className="u-label opacity-75" style={{ color: project.accent }}>
+			<ProjectMotif slug={project.slug} color={project.accent} />
+
+			<div className="relative z-10 mb-8 flex items-start justify-between">
+				<span className="u-label text-[var(--accent)] opacity-75">
 					{project.status} v{project.version}
 				</span>
-				<span
-					className="font-mono text-lg tracking-tight opacity-80"
-					style={{ color: project.accent }}
-				>
+				<span className="font-mono text-lg tracking-tight text-[var(--accent)] opacity-80">
 					{project.glyph}
 				</span>
 			</div>
 
-			<div>
-				<h3 className="u-display text-[2.5rem] text-fg">{project.name}</h3>
-				<p className="u-label mt-3" style={{ color: project.accent }}>
-					{project.tagline}
-				</p>
+			<div className="relative z-10">
+				<div className="flex items-center gap-3">
+					<ProjectIcon project={project} size={36} className="rounded-[22%]" />
+					<h3 className="u-display text-[2.5rem] text-fg">{project.name}</h3>
+				</div>
+				<p className="u-label mt-3 text-[var(--accent)]">{project.tagline}</p>
 				<p className="mt-4 max-w-[32ch] text-sm leading-relaxed text-fg-muted">
 					{project.description}
 				</p>
@@ -42,8 +47,7 @@ export function ProjectCard({ project }: { project: Project }) {
 
 			<span
 				aria-hidden="true"
-				className="absolute bottom-0 left-0 h-px w-12 transition-all duration-300 group-hover:w-24"
-				style={{ backgroundColor: project.accent }}
+				className="absolute bottom-0 left-0 z-10 h-px w-12 bg-[var(--accent)] transition-all duration-300 group-hover:w-24"
 			/>
 		</Link>
 	);

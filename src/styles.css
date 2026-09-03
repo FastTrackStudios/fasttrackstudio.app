@@ -85,10 +85,17 @@
 	--color-fg-muted: #9c9ca8;
 	--color-fg-subtle: #63636f;
 
-	/* Product identity. Used for nothing else, ever. */
-	--color-signal: #4da3ff;
-	--color-session: #56e39f;
-	--color-ignition: #ffb01f;
+	/* Product identity. Used for nothing else, ever.
+	   These are taken FROM the shipped app icons (each repo's
+	   apps/<product>/ios/icon.svg ambient light), so a product's icon and the beam
+	   lighting it are the same colour. Change one and change the other. */
+	--color-signal: #2fd673;
+	--color-session: #2e9bff;
+	--color-ignition: #ff8a2b;
+
+	/* Keyflow is the chart format, not a stage position — it is lit in the
+	   band below the stage, never by a beam. */
+	--color-keyflow: #a78bfa;
 
 	--radius-card: 2px;
 }
@@ -462,6 +469,61 @@ body {
 	to {
 		opacity: 1;
 		transform: none;
+	}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Catalogue tiles
+   ═══════════════════════════════════════════════════════════════════════
+
+   Each tile in /projects carries a motif of the thing it is: bars for the
+   audio side, a section ruler for the coordinator, panning beams for the
+   lighting side, a staff for the chart format. They are cheap CSS loops,
+   not canvas — a catalogue page should not start a render loop per card.
+
+   All of it is decoration, and the reduced-motion block at the foot of this
+   file already freezes every animation on the page. */
+
+/* A playhead crossing the tile, left to right. */
+@keyframes tile-scan {
+	from {
+		left: 0%;
+	}
+	to {
+		left: 100%;
+	}
+}
+
+/* Glyphs drifting across, starting and ending off the edges. */
+@keyframes tile-drift {
+	from {
+		left: -14%;
+	}
+	to {
+		left: 114%;
+	}
+}
+
+/* Equalizer bars breathing up to their own `--peak`. */
+@keyframes tile-eq {
+	0%,
+	100% {
+		height: 5px;
+	}
+	50% {
+		height: var(--peak, 28px);
+	}
+}
+
+/* A lighting fixture panning on its yoke. `transform-origin` is the top of
+   the beam, so it swings from the hang point rather than about its middle. */
+@keyframes tile-pan {
+	0%,
+	100% {
+		transform: rotate(calc(var(--throw, 16) * -1deg));
+	}
+	50% {
+		transform: rotate(calc(var(--throw, 16) * 1deg));
 	}
 }
 

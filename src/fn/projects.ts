@@ -12,6 +12,7 @@ import * as z from "zod";
 
 import { projectSearchSchema } from "#/lib/projects";
 import {
+	chartFormat,
 	findProject,
 	listProjects,
 	queryProjects,
@@ -30,6 +31,15 @@ export const fetchProjects = createServerFn({ method: "GET" }).handler(
  */
 export const fetchStagePositions = createServerFn({ method: "GET" }).handler(
 	async () => stagePositions(),
+);
+
+/**
+ * The stage plus the format band under it, in ONE round trip. Keyflow is
+ * part of the same first response as the three positions — a second call
+ * would put the band behind a flush the rest of the page does not need.
+ */
+export const fetchLanding = createServerFn({ method: "GET" }).handler(
+	async () => ({ positions: stagePositions(), format: chartFormat() ?? null }),
 );
 
 /** Filtered + sorted view — driven by the `/projects` search params. */

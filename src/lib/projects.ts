@@ -32,6 +32,15 @@ export interface Project {
 	description: string;
 	/** Short monospace mark, e.g. `.kf`. */
 	glyph: string;
+	/**
+	 * The product's shipped app icon, copied into `public/icons/` from its own
+	 * repo (`apps/<product>/ios/icon.svg`). Optional: a project without a released
+	 * app has no icon, and everything that renders one falls back to `glyph`.
+	 *
+	 * Re-copy it when the upstream icon changes — this is a snapshot, not a
+	 * live reference.
+	 */
+	icon?: string;
 	/** Hex accent used for borders, rules and the tile's motif. */
 	accent: string;
 	/** Hex tile background — each project owns a slightly different dark. */
@@ -42,6 +51,15 @@ export interface Project {
 	 * catalogue cards.
 	 */
 	capabilities: readonly Capability[];
+	/**
+	 * The product's own deployment under this apex, when it has one.
+	 *
+	 * `live: false` means the subdomain is planned and named but is not
+	 * serving the product yet — today it answers from a wildcard with a blank
+	 * page. Those render as a disabled control rather than a link: a button
+	 * that lands on nothing costs more trust than one that says wait.
+	 */
+	site?: { url: string; live: boolean };
 	status: ProjectStatus;
 	version: string;
 	repo: string;
