@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 
-import { WaitlistForm } from "#/components/layout/waitlist-form";
 import { PRODUCTS } from "#/content/products";
 import { NAV_LINKS, SITE, SOCIAL_LINKS } from "#/content/site";
 import { hostOf } from "#/lib/url";
@@ -13,11 +12,15 @@ export function SiteFooter() {
 		<footer className="border-t border-line bg-surface/40">
 			<div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
 				<div className="flex flex-col gap-4">
-					<p className="u-label text-fg-subtle">Stay in the loop</p>
-					<p className="max-w-md text-sm leading-relaxed text-fg-muted">
-						Release notes when something ships. No cadence, no marketing.
+					<Link
+						to="/"
+						className="u-display self-start text-lg text-fg transition-opacity hover:opacity-70"
+					>
+						{SITE.name}
+					</Link>
+					<p className="max-w-sm text-sm leading-relaxed text-fg-muted">
+						{SITE.description}
 					</p>
-					<WaitlistForm />
 				</div>
 
 				{/* Every product, by address — from the same table the stage links
@@ -38,7 +41,7 @@ export function SiteFooter() {
 					))}
 				</FooterColumn>
 
-				<FooterColumn title={SITE.name}>
+				<FooterColumn title="More">
 					{NAV_LINKS.map((link) => (
 						<li key={link.to}>
 							<Link

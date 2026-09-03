@@ -43,7 +43,7 @@ src/
   components/
     ui/         primitives with no opinion about the page: actions (the one
                 button shape), icons, the product icon
-    layout/     the shell — header, footer, waitlist form, 404/error pages
+    layout/     the shell — header, footer, 404/error pages
     stage/      the first screen: <Scene> (the room and the rig), <Marquee>,
                 <Position>, and <Stage> that assembles them
     keyflow/    the band under the stage: <ChartBand>, its flow diagram
@@ -71,8 +71,8 @@ Where to go for a given change:
 `src/server/*` starts with `import "@tanstack/react-start/server-only"`. That
 marker makes importing the module from client code a **build-time** error, not
 a runtime surprise or a silent bundle leak. Client code reaches that data
-through `src/fn/*`, where any entry point that takes input validates it with zod
-before the handler runs (the waitlist does; the landing fetch takes none):
+through `src/fn/*`, where an entry point that takes input validates it with zod before the
+handler runs (the landing fetch takes none):
 
 ```ts
 export const fetchLanding = createServerFn({ method: "GET" }).handler(
@@ -180,7 +180,9 @@ FastTrackStudio monorepo deploys `fts-site`.
 
 The `Dockerfile` still builds and runs the same app and is handy locally or
 on a non-Nix host — it just is not what ships. If you change the runtime
-contract (port, `WAITLIST_FILE`, `GIT_SHA`), change both.
+contract (port, `GIT_SHA`), change both. `WAITLIST_FILE` is still wired
+through the Dockerfile, the chart and the image for a newsletter that does not
+exist yet; nothing reads it.
 
 Two known trade-offs:
 
@@ -231,12 +233,17 @@ record carried over with no window where the apex resolved to nothing.
 The Dioxus app's source is recoverable from the monorepo at `d3980e4dd^`
 if any of it is ever wanted again.
 
-### Waitlist
+### Icons
 
-`src/server/waitlist.ts` appends signups to `$WAITLIST_FILE` as JSONL — no
-database, so the scaffold runs anywhere. Before pointing real humans at the
-form, either enable `persistence` in the chart or replace the body of
-`recordSignup` with a real backend. Nothing above it has to change.
+`public/icon.svg` is the site's mark — the stage: three beams on a dark plate,
+the same plate as the product icons. `favicon.ico` (16–64px) and
+`apple-touch-icon.png` (180px) are rendered from it; re-render after editing:
+
+```bash
+magick -background none -density 384 public/icon.svg -resize 1024x1024 /tmp/icon.png
+magick /tmp/icon.png -resize 180x180 public/apple-touch-icon.png
+magick /tmp/icon.png -define icon:auto-resize=64,48,32,16 public/favicon.ico
+```
 
 ## Environment
 
