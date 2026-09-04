@@ -162,12 +162,27 @@ push to main
   → nix develop: bun install + vite build   → .output
   → nix build --impure .#image              → streamLayeredImage
   → skopeo copy  registry.starcommand.live:30050/fts-www:{latest,sha-…}
+  → (CI ends here)
   → argocd-image-updater rolls the Deployment (digest strategy on `latest`)
-  → "Verify live" polls /version.json until it reports the pushed commit
 ```
 
-`GIT_SHA` is baked into the image and reported by `/version.json`; that is
-what makes a green deploy mean *the cluster serves this commit*.
+**A green run means the image is in the registry, not that the cluster serves
+it.** The rollout is Argo's, and it usually lands a couple of minutes later.
+`GIT_SHA` is baked into the image and reported by `/version.json`, so what is
+actually being served is one request away:
+
+```bash
+curl -s https://fasttrackstudio.app/version.json
+```
+
+CI used to poll that until it reported the pushed commit. It was a real
+guarantee and it is a shame to lose it, but the deploy job runs on a
+self-hosted runner **shared with every other FastTrackStudios repo**, and the
+poll held that runner for up to fifteen idle minutes per deploy while other
+repos queued behind it. If the guarantee is wanted back, the way to do it
+without the queue cost is a second job on `ubuntu-latest` — verifying only
+needs the public URL, not the LAN — so the self-hosted runner is released as
+soon as the image is pushed.
 
 ### Why Nix builds the image and not the Dockerfile
 

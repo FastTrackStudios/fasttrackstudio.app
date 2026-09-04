@@ -14,8 +14,21 @@
 # works for local runs and non-Nix hosts; it just is not what CI uses.
 #
 # argocd-image-updater (digest strategy on the `latest` tag) rolls the
-# Deployment; "Verify live" then polls /version.json until the cluster serves
-# THIS commit, so a green run means deployed, not merely pushed.
+# Deployment from there, usually within a couple of minutes.
+#
+# THE RUN ENDS AT THE PUSH — green means "image is in the registry", not
+# "the cluster serves it". There used to be a "Verify live" step that polled
+# /version.json until the apex reported this commit, which is the better
+# guarantee, but it held this SHARED self-hosted runner for up to fifteen
+# idle minutes per deploy and queued every other FastTrackStudios repo
+# behind it. Waiting on a rollout is not worth a runner.
+#
+# To see what is actually being served:
+#
+#   curl -s https://fasttrackstudio.app/version.json
+#
+# If that stops catching up, the cause is on the cluster side rather than
+# here — see "Deployment" in the README.
 
 name: deploy
 
@@ -35,11 +48,6 @@ env:
   # Newer skopeo rejects the host's v1 registries.conf; we name the registry
   # explicitly everywhere, so use an empty (valid) config.
   CONTAINERS_REGISTRIES_CONF: /dev/null
-  # Polled by Verify live. The apex now resolves to the cluster edge and the
-  # Argo Application serves this chart there (see the cutover note in
-  # ~/.starcommand/modules/services/fasttrackstudio-site), so this polls the
-  # real address rather than the LAN wildcard the scaffold used.
-  VERIFY_URL: https://fasttrackstudio.app
 
 jobs:
   deploy:
@@ -96,21 +104,3 @@ jobs:
             --dest-tls-verify=false --dest-no-creds \
             "docker://${REGISTRY}/${IMAGE}:latest" \
             "docker://${REGISTRY}/${IMAGE}:${{ steps.tags.outputs.sha }}"
-
-      - name: Verify live
-        run: |
-          want="${GITHUB_SHA}"
-          echo "waiting for ${VERIFY_URL} to serve ${want}"
-          for i in $(seq 1 60); do
-            rev="$(curl -sf --max-time 10 "${VERIFY_URL}/version.json" \
-              | sed -n 's/.*"rev":"\([^"]*\)".*/\1/p' || true)"
-            echo "  poll $i: rev=${rev:-?}"
-            if [ "$rev" = "$want" ]; then
-              echo "LIVE: ${VERIFY_URL} serves ${want}"
-              exit 0
-            fi
-            sleep 15
-          done
-          echo "TIMED OUT: ${VERIFY_URL} never served ${want}"
-          echo "check argocd-image-updater and the fts-www Application"
-          exit 1
