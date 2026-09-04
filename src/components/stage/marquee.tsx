@@ -1,8 +1,4 @@
-import {
-	ExternalAction,
-	InternalAction,
-	SoonAction,
-} from "#/components/ui/action";
+import { ExternalAction, InternalAction } from "#/components/ui/action";
 import { PlatformMarks } from "#/components/ui/icons";
 import { HERO, HERO_ACTIONS } from "#/content/hero";
 import { rise } from "#/lib/motion";
@@ -77,7 +73,7 @@ function Actions() {
 							<ExternalAction
 								key={action.label}
 								href={action.href}
-								newTab
+								newTab={action.newTab}
 								emphasis={emphasis}
 							>
 								{action.label}
@@ -93,8 +89,6 @@ function Actions() {
 								{action.label}
 							</InternalAction>
 						);
-					case "soon":
-						return <SoonAction key={action.label} label={action.label} />;
 					default:
 						return null;
 				}

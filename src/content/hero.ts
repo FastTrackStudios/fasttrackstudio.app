@@ -2,6 +2,8 @@
  * The marquee — everything above the stage.
  */
 
+import { SUBDOMAINS } from "#/content/site";
+
 /**
  * `lead` is the claim, `stance` is the position — the second line is
  * deliberately shorter, with only `emphasis` at full brightness.
@@ -19,19 +21,26 @@ export const HERO = {
 } as const;
 
 /**
- * The hero's calls to action, in priority order.
+ * The hero's calls to action, in priority order — only the first carries
+ * full weight.
  *
- * `soon` marks something that does not exist yet. It renders as a disabled
- * control rather than a link, because shipping a button that 404s costs more
- * trust than not showing it at all — and saying "soon" out loud is a better
- * signal than silence.
+ * `newTab` marks a link that LEAVES this universe. GitHub is someone else's
+ * site, so it opens beside this one; the forum is ours, on a subdomain of
+ * this apex, so it opens in place — the same way the products on the stage
+ * do.
  */
 export const HERO_ACTIONS = [
 	{
 		kind: "external",
 		label: "Source",
 		href: "https://github.com/FastTrackStudios",
+		newTab: true,
 	},
 	{ kind: "internal", label: "Contribute", to: "/contribute" },
-	{ kind: "soon", label: "Forum" },
+	{
+		kind: "external",
+		label: "Forum",
+		href: SUBDOMAINS.forum,
+		newTab: false,
+	},
 ] as const;

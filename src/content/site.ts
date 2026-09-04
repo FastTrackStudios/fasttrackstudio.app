@@ -32,9 +32,10 @@ export const SOCIAL_LINKS = [
 
 /**
  * Sibling apps that deploy to their own subdomain of this apex but are not
- * products (the guides vault, the docs). Linked, never imported.
+ * products (the forum, the guides vault, the docs). Linked, never imported.
  */
 export const SUBDOMAINS = {
+	forum: "https://forum.fasttrackstudio.app",
 	guides: "https://guides.fasttrackstudio.app",
 	docs: "https://docs.fasttrackstudio.app",
 } as const;

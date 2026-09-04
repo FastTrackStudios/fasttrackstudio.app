@@ -2,7 +2,7 @@ import { Link, type LinkProps } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 /**
- * The site's one button shape, in its three weights.
+ * The site's one button shape, in its two weights.
  *
  * Greyscale by design: on this page colour is product identity, so a button
  * that borrowed Signal's green would read as being about Signal. Priority is
@@ -10,7 +10,10 @@ import type { ReactNode } from "react";
  *
  *   primary    a bright border, fills on hover. One per group.
  *   secondary  a quiet border, brightens on hover.
- *   soon       named but not built. Renders inert, and says so.
+ *
+ * There was a third, `soon`: an inert control for something named but not
+ * built. The forum was the last of those and it is live now, so it is gone —
+ * git remembers it if anything needs to be announced ahead of shipping again.
  */
 export type Emphasis = "primary" | "secondary";
 
@@ -70,48 +73,5 @@ export function InternalAction({
 		<Link to={to} className={classes(rest)}>
 			{children}
 		</Link>
-	);
-}
-
-/**
- * Something that does not exist yet.
- *
- * `aria-disabled` rather than `disabled`: a disabled button drops out of the
- * tab order entirely, so a keyboard user never learns the action exists.
- * This one is reachable, announced as unavailable, and does nothing when
- * pressed. The explicit label stops the two spans concatenating to
- * "Forumsoon" for a screen reader.
- */
-export function SoonAction({
-	label,
-	size = "md",
-	className = "",
-}: {
-	label: string;
-	size?: keyof typeof SIZE;
-	className?: string;
-}) {
-	return (
-		<button
-			type="button"
-			aria-disabled="true"
-			aria-label={`${label} — coming soon`}
-			className={`${BASE} ${SIZE[size]} cursor-not-allowed border-line text-fg-subtle ${className}`}
-		>
-			<span aria-hidden="true">{label}</span>
-			<SoonTag />
-		</button>
-	);
-}
-
-/** The small "soon" mark, for anything named ahead of existing. */
-export function SoonTag({ className = "" }: { className?: string }) {
-	return (
-		<span
-			aria-hidden="true"
-			className={`rounded-[2px] border border-current px-1.5 py-1 text-[0.5625rem] tracking-[0.18em] opacity-70 ${className}`}
-		>
-			soon
-		</span>
 	);
 }
